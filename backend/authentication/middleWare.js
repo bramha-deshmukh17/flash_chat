@@ -6,7 +6,7 @@ const SECRET_KEY = process.env.JWT_SECRET;
 
 const authenticateToken = (req, res, next) => {
     const token = req.cookies.authToken; // Get token from cookie
-
+    //console.log(token);
     if (!token) {
         return res.status(401).json({ error: "Unauthorized access. No token found." });
     }

@@ -61,7 +61,8 @@ const ChatList = async (req, res) => {
         // Return the fetched chats along with user details
         res.status(200).json({
             message: 'Chats fetched successfully!',
-            chats: chats
+            chats: chats,
+            userId: loggedInUserId,
         });
     } catch (error) {
         console.error(error);

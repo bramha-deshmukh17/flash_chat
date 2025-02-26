@@ -5,6 +5,7 @@ import Welcome from "./Welcome";
 import Register from "./Authenticate/Register";
 import Login from './Authenticate/Login';
 import Chats from './chat_screens/Chats'
+import Setting from './settings/Setting'
 import ErrorBoundary from "./ErrorBoundary";
 
 function App() {
@@ -17,6 +18,7 @@ function App() {
             <Route path="/register" element={<Register />} />
             <Route path="/login" element={<Login />} />
             <Route path="/chats" element={<Chats />} />
+            <Route path="/settings" element={<Setting />} />
             
           </Routes>
         </Router>

@@ -25,11 +25,9 @@ const AddMessages = async ({ chatId, message, senderId, photoUrl = null }) => {
         chat.chats.push(newMessage);
         await chat.save();
 
-        console.log(`✅ Message stored in MongoDB: ${message}`);
 
         return { success: true, message: newMessage };
     } catch (error) {
-        console.error("❌ Error storing message:", error);
         return { error: "Internal server error." };
     }
 };

@@ -19,30 +19,61 @@ button:focus {
     box-shadow: none;
 }
 
-.default{
-    --secondary-text: #5f99be;
+.default {
+    --secondary-text: #51a2ff;
 }
 
 .light {
     --main-heading: #000;
     --text-color: #000;
     --btn-color: #f59e0b;
-    --btn-two-color: #5f99be;
+    --btn-two-color: #51a2ff;
     --btn-text: #fff;
     --bg-color: #fff;
     --shadow-color: #999;
+    --hover-color: #6b7280;
 }
 
 .dark {
     --main-heading: #f59e0b;
     --text-color: #fff;
-    --btn-color: #5f99be;
+    --btn-color: #51a2ff;
     --btn-two-color: #f59e0b;
     --btn-text: #fff;
     --bg-color: #1F2937;
     --shadow-color: #000;
+    --hover-color: #111827;
 }
 
+/* Scrollbar */
+::-webkit-scrollbar {
+    width: 10px;
+}
+
+::-webkit-scrollbar:hover {
+    width: 15px;
+}
+
+/* Track */
+::-webkit-scrollbar-track {
+    background: #88888865;
+    border-radius: 10px;
+}
+
+/* Handle */
+::-webkit-scrollbar-thumb {
+    background: #888;
+    border-radius: 10px;
+    border: 2px solid transparent;
+    background-clip: padding-box;
+}
+
+::-webkit-scrollbar-thumb:hover {
+    border: 0;
+    background-color: #f59e0b;
+}
+
+/* Scrollbar */
 /*-------welcome page------*/
 #welcome {
     height: 100vh;
@@ -50,7 +81,7 @@ button:focus {
     background-color: var(--bg-color);
 }
 
-#welcome div button{
+#welcome div button {
     color: var(--btn-text);
     padding: 1rem 2rem;
     font-size: 1.2rem;
@@ -59,6 +90,7 @@ button:focus {
     margin-top: 20px;
     margin: 2em;
 }
+
 /*-------welcome page------*/
 
 /*-----login page-------*/
@@ -68,35 +100,35 @@ button:focus {
     background-color: var(--bg-color);
 }
 
-#login form{
+#login form {
     align-items: center;
     overflow-x: hidden;
 }
 
-#login form span{
+#login form span {
     color: red;
     font-size: 12px;
     display: none;
     bottom: -40px;
     left: 0;
-} 
+}
 
 /*------login page------*/
 
 /*-------Register Page--------*/
-#register{
+#register {
     overflow: hidden;
     background-color: var(--bg-color);
     color: var(--text-color);
     height: 100vh;
 }
 
-#register form{
+#register form {
     align-items: center;
     overflow-x: hidden;
 }
 
-#register form span{
+#register form span {
     color: red;
     font-size: 0.8rem;
     bottom: -40px;
@@ -105,7 +137,15 @@ button:focus {
 
 /*-------Register Page--------*/
 
+
+
 /*---------chats page----------*/
+
+#chats h2 {
+    padding: 0.5rem;
+    font-weight: bold;
+    color: var(--secondary-text);
+}
 
 /*---------sidebar--------------*/
 #sidebar {
@@ -115,6 +155,7 @@ button:focus {
     overflow-y: auto;
     border-right: 1px solid var(--main-heading);
 }
+
 /*---------sidebar--------------*/
 
 /*---------chatlist-------------*/
@@ -126,33 +167,139 @@ button:focus {
     background-color: transparent;
     border-radius: 5px;
 }
+
 #chat-list input[type="text"]:focus {
     border: 1px solid var(--btn-color);
     background-color: var(--shadow-color);
 }
 
-#chat-list ul h2{
+#chat-list ul h2 {
     padding: 1rem;
     font-weight: bold;
     color: var(--secondary-text);
 }
 
-#chat-list ul li{
+#chat-list ul li {
     padding: 1rem;
     border-bottom: 1px solid var(--main-heading);
     border-top: 1px solid var(--main-heading);
     border-collapse: collapse;
-    &:hover{
+
+    &:hover {
         cursor: pointer;
+        background-color: var(--hover-color);
     }
 }
+
 /*---------chatlist-------------*/
 
-/* Chat window */
-.messages{
-    color: var(--text-color);
-    font-size: 1rem;
-}
-/* Chat window */
 
+/* Chat window */
+/* Ensure the chat window is scrollable */
+#chat-window {
+    overflow-y: auto;
+    height: 100vh;
+}
+
+#chat-window h2 {
+    padding: 1rem;
+    font-weight: bold;
+    color: var(--secondary-text);
+}
+
+#chat-window .messages-container {
+    display: flex;
+    flex-direction: column;
+    gap: 0.5rem;
+}
+
+/* Base styling for message bubble */
+#chat-window .message-bubble {
+    max-width: 60%;
+    min-width: 120px;
+    padding: 0.75rem 1rem;
+    /* Increase bottom padding to add gap between text and date */
+    padding-bottom: 2rem;
+    font-size: 1rem;
+    color: var(--text-color);
+    border-radius: 20px;
+    position: relative;
+    word-wrap: break-word;
+}
+
+/* Styling for my messages (align right) */
+#chat-window .my-message {
+    align-self: flex-end;
+    background-color: #bb872c;
+    text-align: left;
+    border-top-right-radius: 0;
+}
+
+/* Styling for other messages (align left) */
+#chat-window .other-message {
+    align-self: flex-start;
+    background-color: var(--bg-color);
+    text-align: left;
+    border-top-left-radius: 0;
+    box-shadow: 0 8px 10px 0 var(--shadow-color);
+}
+
+/* Styling for the date inside the bubble */
+#chat-window .date {
+    font-size: 0.75rem;
+    position: absolute;
+    bottom: 10px;
+    right: 10px;
+    white-space: nowrap;
+}
+
+/* Chat window */
 /*---------chats page----------*/
+
+
+/* Settings */
+#settings {
+    background-color: var(--bg-color);
+    color: var(--text-color);
+    height: 100vh;
+    overflow-y: hidden;
+}
+
+#settings h2 {
+    font-size: 2rem;
+    font-weight: bold;
+    color: var(--secondary-text);
+    padding: 1rem 2.5rem;
+}
+
+#settings .left .section-list li:hover {
+    cursor: pointer;
+    background-color: var(--hover-color);
+
+}
+
+#settings .right .section-info img {
+    width: 150px;
+    height: 150px;
+}
+
+#settings .right .head {
+    font-size: 1.5rem;
+    font-weight: bold;
+    color: var(--secondary-text);
+}
+
+#settings input {
+    padding: 10px;
+    margin: 10px 0;
+    border: 1px solid var(--main-heading);
+    background-color: transparent;
+    border-radius: 5px;
+}
+
+#settings input:focus {
+    border: 1px solid var(--btn-color);
+    background-color: var(--shadow-color);
+}
+
+/* Settings */

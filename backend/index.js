@@ -16,6 +16,9 @@ const { SearchChat } = require('./chat/SearchChat');
 const { ChatList } = require('./chat/ChatList');
 const { Messages } = require('./chat/messages');
 const { AddMessages } = require('./chat/addMessages');
+const { Setting } = require('./setting/setting');
+const { UpdateProfile } = require('./setting/updateProfile');
+const { UpdatePassword } = require('./setting/updatePassword');
 
 dotenv.config();
 
@@ -52,33 +55,31 @@ app.use(cookieParser());
 
 // Socket.io Handling
 io.on("connection", (socket) => {
-    console.log(`🔌 New Client Connected: ${socket.id}`);
 
     let senderId;
 
     // Extract cookies from WebSocket handshake request
     const cookies = socket.handshake.headers.cookie;
     if (cookies) {
-        const parsedCookies = cookie.parse(cookies); // ✅ Corrected WebSocket cookie parsing
-        const token = parsedCookies.authToken; // Assuming JWT is stored in HttpOnly cookie "authToken"
+        const parsedCookies = cookie.parse(cookies);
+        const token = parsedCookies.authToken; 
 
         if (token) {
             try {
                 const decoded = jwt.verify(token, process.env.JWT_SECRET);
                 senderId = decoded.userId; // Extract sender ID from JWT
-                console.log(`🔑 User Authenticated: ${senderId}`);
             } catch (err) {
-                console.error("❌ Invalid Token:", err.message);
+                console.error("Invalid Token:", err.message);
                 socket.disconnect();
                 return;
             }
         } else {
-            console.error("❌ No Token Provided");
+            console.error("No Token Provided");
             socket.disconnect();
             return;
         }
     } else {
-        console.error("❌ No Cookies Found");
+        console.error("No Cookies Found");
         socket.disconnect();
         return;
     }
@@ -86,17 +87,17 @@ io.on("connection", (socket) => {
     // Join chat room
     socket.on("joinChat", (chatId) => {
         socket.join(chatId);
-        console.log(`📌 User ${senderId} joined chat room: ${chatId}`);
     });
 
     // Handle sending messages
     socket.on("send", async ({ chatId, message }) => {
-        console.log(`📩 Message in chat ${chatId} from ${senderId}:`, message);
 
         const result = await AddMessages({ chatId, message, senderId });
 
         if (result.success) {
-            io.to(chatId).emit("send", { message: {message, senderId, photo_Url: null} });
+            let by = senderId;
+            io.to(chatId).emit("send", { message: { message, by, photo_Url: null, date: new Date().toISOString() } });
+
         } else {
             socket.emit("error", { error: result.error });
         }
@@ -104,7 +105,7 @@ io.on("connection", (socket) => {
 
     // Handle disconnect
     socket.on("disconnect", () => {
-        console.log(`❌ User Disconnected: ${socket.id}`);
+        console.log(`User Disconnected: ${socket.id}`);
     });
 });
 
@@ -120,6 +121,11 @@ app.get('/chats', authenticateToken, ChatList);
 app.get('/chats/search', authenticateToken, SearchChat);
 app.get('/chats/:chatId/getmessages', authenticateToken, Messages);
 
+
+app.get('/settings', authenticateToken, Setting);
+app.post('/update/profile', authenticateToken, UpdateProfile);
+app.post('/update/password', authenticateToken, UpdatePassword);
+
 // Start the Server
 const PORT = process.env.PORT || 3001;
-server.listen(PORT, () => console.log(`🚀 Server running on port http://localhost:${PORT}`));
+server.listen(PORT, () => console.log(`Server running on port http://localhost:${PORT}`));
