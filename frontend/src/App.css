@@ -253,6 +253,11 @@ button:focus {
     white-space: nowrap;
 }
 
+#chat-window img {
+    width: 15rem;
+    padding: none;
+}
+
 /* Chat window */
 /*---------chats page----------*/
 

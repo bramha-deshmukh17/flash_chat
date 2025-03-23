@@ -1,6 +1,6 @@
 import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
-import { Profile, Password, Theme, PrivacyPolicy } from "./Sections";
+import { Profile, Password, Theme, PrivacyPolicy, Logout } from "./Sections";
 
 const Setting = () => {
     const navigate = useNavigate();
@@ -27,6 +27,7 @@ const Setting = () => {
         Password: <Password />,
         Theme: <Theme />,
         "Privacy Policy": <PrivacyPolicy />,
+        Logout: <Logout />,
     };
     
     return (

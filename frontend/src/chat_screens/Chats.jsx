@@ -32,18 +32,6 @@ const Chats = () => {
             .catch((error) => console.error("Validation error:", error.message));
     }, [navigate, URI]);
 
-    const logout = async () => {
-        fetch(`${URI}logout`, {
-            method: "POST",
-            credentials: "include",
-        })
-            .then((res) => res.json())
-            .then((data) =>
-                data.error ? console.error(data.error) : navigate("/login")
-            )
-            .catch((error) => console.error("Logout error:", error.message));
-    };
-
     return (
         <div
             className="flex overflow-hidden"
@@ -78,9 +66,7 @@ const Chats = () => {
                             <h2 className="text-xl">Messages</h2>
                             <ChatWindow activeChat={activeChat} activeUserId={activeUserId} />
                         </div>
-                        <form onSubmit={logout} className="p-4">
-                            <button type="submit">Logout</button>
-                        </form>
+                       
                     </>
                 ) : (
                     // Mobile view: Conditionally show ChatList or ChatWindow

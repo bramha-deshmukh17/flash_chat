@@ -16,6 +16,7 @@ const { SearchChat } = require('./chat/SearchChat');
 const { ChatList } = require('./chat/ChatList');
 const { Messages } = require('./chat/messages');
 const { AddMessages } = require('./chat/addMessages');
+const { UploadDocument } = require('./chat/uploadDoc');
 const { Setting } = require('./setting/setting');
 const { UpdateProfile } = require('./setting/updateProfile');
 const { UpdatePassword } = require('./setting/updatePassword');
@@ -62,7 +63,7 @@ io.on("connection", (socket) => {
     const cookies = socket.handshake.headers.cookie;
     if (cookies) {
         const parsedCookies = cookie.parse(cookies);
-        const token = parsedCookies.authToken; 
+        const token = parsedCookies.authToken;
 
         if (token) {
             try {
@@ -103,6 +104,23 @@ io.on("connection", (socket) => {
         }
     });
 
+    // Handle image sharing
+    socket.on("shareImage", async ({ chatId, message = null, photo, mimeType }) => {
+        const imgUrl = await UploadDocument(photo, chatId, mimeType);
+        if (imgUrl.success) {
+            const result = await AddMessages({ chatId, message: message, senderId, photoUrl: imgUrl.message, });
+            if (result.success) {
+                let by = senderId;
+                io.to(chatId).emit("shareImage", { message: { message, by, photo_Url: imgUrl.message, date: new Date().toISOString() } });
+            } else {
+                socket.emit("error", { error: result.error });
+            }
+        }else{
+            console.log(imgUrl.error)
+        }
+
+    });
+
     // Handle disconnect
     socket.on("disconnect", () => {
         console.log(`User Disconnected: ${socket.id}`);
@@ -120,6 +138,7 @@ app.post('/logout', (req, res) => {
 app.get('/chats', authenticateToken, ChatList);
 app.get('/chats/search', authenticateToken, SearchChat);
 app.get('/chats/:chatId/getmessages', authenticateToken, Messages);
+app.post('/chats/:chatId/sendimage', authenticateToken, UploadDocument);
 
 
 app.get('/settings', authenticateToken, Setting);

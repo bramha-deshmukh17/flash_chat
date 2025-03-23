@@ -358,3 +358,27 @@ export const PrivacyPolicy = () => {
     );
 
 };
+
+export const Logout = () => {
+
+    const logout = async () => {
+        fetch(`${URI}logout`, {
+            method: "POST",
+            credentials: "include",
+        })
+            .then((res) => res.json())
+            .then((data) =>
+                data.error ? console.error(data.error) : navigate("/login")
+            )
+            .catch((error) => console.error("Logout error:", error.message));
+    };
+
+    return (
+        <form onSubmit={logout} className="p-4">
+            <button type='submit' className="bg-red-500 p-3 rounded text-white" style={{ width: '17%' }}>Logout</button>
+            
+        </form>
+
+    );
+
+};
