@@ -14,7 +14,7 @@ const User = mongoose.model("User", userSchema);
 const messageSchema = new mongoose.Schema({
     message: { type: String, required: false },
     by: { type: mongoose.Schema.Types.ObjectId, ref: "User", required: true },
-    photo_Url: { type: String, required: false }, // Optional image URL
+    file_Url: { type: String, required: false }, // Optional file URL
     date: { type: Date, default: Date.now } // Default to current date
 }); 
 

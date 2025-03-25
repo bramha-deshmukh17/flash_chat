@@ -36,6 +36,7 @@ mongoose
 const app = express();
 const server = http.createServer(app);
 const io = new Server(server, {
+    maxHttpBufferSize:  10 * 1024 * 1024, // 10MB (adjust as needed)
     cors: {
         origin: process.env.FRONTEND_URL, // Allow frontend origin
         methods: ['GET', 'POST', 'PUT', 'DELETE'], // Allow specific methods
@@ -71,16 +72,19 @@ io.on("connection", (socket) => {
                 senderId = decoded.userId; // Extract sender ID from JWT
             } catch (err) {
                 console.error("Invalid Token:", err.message);
+                socket.emit("error", { error: "Invalid Token" });
                 socket.disconnect();
                 return;
             }
         } else {
             console.error("No Token Provided");
+            socket.emit("error", { error: "No Token Provided" });
             socket.disconnect();
             return;
         }
     } else {
         console.error("No Cookies Found");
+        socket.emit("error", { error: "No Cookies Found" });
         socket.disconnect();
         return;
     }
@@ -92,38 +96,42 @@ io.on("connection", (socket) => {
 
     // Handle sending messages
     socket.on("send", async ({ chatId, message }) => {
-
         const result = await AddMessages({ chatId, message, senderId });
 
         if (result.success) {
             let by = senderId;
-            io.to(chatId).emit("send", { message: { message, by, photo_Url: null, date: new Date().toISOString() } });
-
+            io.to(chatId).emit("send", { message: { message, by, file_url: null, date: new Date().toISOString() } });
+            
         } else {
             socket.emit("error", { error: result.error });
+            
         }
     });
 
     // Handle image sharing
-    socket.on("shareImage", async ({ chatId, message = null, photo, mimeType }) => {
-        const imgUrl = await UploadDocument(photo, chatId, mimeType);
-        if (imgUrl.success) {
-            const result = await AddMessages({ chatId, message: message, senderId, photoUrl: imgUrl.message, });
+    socket.on("shareFile", async ({ chatId, message = null, file, mimeType }) => {
+        const fileUrl = await UploadDocument(file, chatId, mimeType);
+        if (fileUrl.success) {
+            const result = await AddMessages({ chatId, message: message, senderId, fileUrl: fileUrl.message });
             if (result.success) {
                 let by = senderId;
-                io.to(chatId).emit("shareImage", { message: { message, by, photo_Url: imgUrl.message, date: new Date().toISOString() } });
+                io.to(chatId).emit("shareFile", { message: { message, by, file_Url: fileUrl.message, date: new Date().toISOString() } });
             } else {
                 socket.emit("error", { error: result.error });
             }
-        }else{
-            console.log(imgUrl.error)
+        } else {
+            console.error("Error uploading file:", fileUrl.error);
         }
-
     });
 
     // Handle disconnect
-    socket.on("disconnect", () => {
-        console.log(`User Disconnected: ${socket.id}`);
+    socket.on("disconnect", (reason) => {
+        console.log(`Client disconnected`);
+    });
+
+    // Handle transport error
+    socket.on("connect_error", (error) => {
+        console.error(`Connection error: ${error.message}`);
     });
 });
 

@@ -1,6 +1,8 @@
 const { initializeApp } = require("firebase/app");
 const { getStorage, ref, uploadBytes, getDownloadURL } = require("firebase/storage");
 
+const MAX_FILE_SIZE = 5 * 1024 * 1024; // 5MB in bytes
+
 // Initialize Firebase
 const firebaseConfig = {
     apiKey: process.env.FB_API_KEY,
@@ -14,25 +16,28 @@ const firebaseConfig = {
 const firebaseApp = initializeApp(firebaseConfig);
 const storage = getStorage(firebaseApp);
 
-async function UploadDocument(fileBuffer, activeChat, mimeType) {
-    
+async function UploadDocument(fileBuffer, chatId, mimeType) {
     try {
+        // Check file size before processing
+        if (fileBuffer.length > MAX_FILE_SIZE) {
+            throw new Error("File size exceeds 5MB. Upload a smaller file.");
+        }
+
         const TimeStamp = Date.now();
         const extension = mimeType.split("/")[1]; // Extract file extension
-        const fileRef = ref(storage, `uploads/${activeChat}/${TimeStamp}.${extension}`);
+        const fileRef = ref(storage, `uploads/${chatId}/${TimeStamp}.${extension}`);
 
         // Set metadata to ensure correct content type
-        const metadata = {
-            contentType: mimeType
-        };
+        const metadata = { contentType: mimeType };
 
         await uploadBytes(fileRef, fileBuffer, metadata);
         const fileURL = await getDownloadURL(fileRef);
-        console.log("File uploaded successfully. File URL:", fileURL);
+
         return { success: true, message: fileURL };
     } catch (error) {
-        console.error("Error uploading file:", error);
-        return { success: false, error: error };
+        console.error("Error uploading file:", error.message);
+        return { success: false, error: error.message };
     }
 }
+
 module.exports = { UploadDocument };

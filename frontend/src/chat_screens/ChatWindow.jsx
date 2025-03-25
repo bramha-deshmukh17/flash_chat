@@ -1,6 +1,7 @@
 import { useEffect, useState } from "react";
 import { io } from "socket.io-client";
 import { FaUpload, FaImage, FaArrowRight, FaPaperPlane } from "react-icons/fa";
+import FilePreview from "./FilePreview"; // Import our new component
 
 // Create the socket instance outside the component (shared across renders)
 const socket = io(import.meta.env.VITE_API_URL, {
@@ -25,12 +26,10 @@ const formatMessageDate = (dateString) => {
 const ChatWindow = ({ activeChat, activeUserId }) => {
     const URI = import.meta.env.VITE_API_URL;
     const [messages, setMessages] = useState([]);
-    const [selectedImage, setSelectedImage] = useState(null);
-    const [imageFile, setImageFile] = useState(null);
+    const [selectedFile, setSelectedFile] = useState(null);
+    const [file, setFile] = useState(null);
     const [inputMessage, setInputMessage] = useState("");
-
-    //loading effect for images
-    const [imageLoading, setImageLoading] = useState({}); // ✅ Store loading states here
+    const [imageLoading, setImageLoading] = useState({});
 
     const handleImageLoad = (index) => {
         setImageLoading((prev) => ({ ...prev, [index]: false }));
@@ -39,7 +38,6 @@ const ChatWindow = ({ activeChat, activeUserId }) => {
     const handleImageError = (index) => {
         setImageLoading((prev) => ({ ...prev, [index]: false }));
     };
-
 
     // Scroll to the bottom when messages update
     useEffect(() => {
@@ -57,9 +55,12 @@ const ChatWindow = ({ activeChat, activeUserId }) => {
             credentials: "include",
         })
             .then((res) => res.json())
-            .then((data) => setMessages(data))
+            .then((data) => {
+                if (Array.isArray(data)) setMessages(data);
+                else console.error("Unexpected response:", data);
+            })
             .catch((error) => console.error("Chat Fetch Error:", error.message));
-    }, [activeChat]);
+    }, [activeChat, URI]);
 
     // Register WebSocket connection event
     useEffect(() => {
@@ -81,95 +82,121 @@ const ChatWindow = ({ activeChat, activeUserId }) => {
         };
 
         socket.on("send", handleMessage);
-        return () => socket.off("send", handleMessage);
+        socket.on("shareFile", handleMessage);
+        return () => {
+            socket.off("send", handleMessage);
+            socket.off("shareFile", handleMessage);
+        };
     }, []);
 
     // Send a text message
     const sendMessage = () => {
         if (inputMessage.trim()) {
             socket.emit("send", { chatId: activeChat, message: inputMessage });
-            setInputMessage(""); // Clear input after sending
-        }
-    };    
-
-    // Handle image selection and preview
-    const handleImageChange = (event) => {
-        const file = event.target.files[0];
-        if (file) {
-            const imageUrl = URL.createObjectURL(file); // Generate preview
-            setSelectedImage(imageUrl);
-            setImageFile(file);
+            setInputMessage("");
         }
     };
 
-    //handle image sharing
-    useEffect(() => {
-        const handleImageMessage = (data) => {
-            setMessages((prevMessages) => [...prevMessages, data.message]);
+    const MAX_FILE_SIZE = 5 * 1024 * 1024; // 5MB in bytes
+    // Handle file selection and preview
+    const handleFileChange = (event) => {
+        const selected = event.target.files[0];
+        if (selected) {
+            if (selected.size > MAX_FILE_SIZE) {
+                alert("File size exceeds 5MB. Please upload a smaller file.");
+                return;
+            }
+            const fileUrl = URL.createObjectURL(selected);
+            setSelectedFile(fileUrl);
+            setFile(selected);
+            console.log("File selected:", selected);
+        }
+    };
+
+    // Handle file upload
+    const sendFile = async () => {
+        if (!file) return;
+
+        const reader = new FileReader();
+        reader.onloadend = () => {
+            const base64String = reader.result; // Do not remove prefix, backend will handle it
+            console.log("File read as base64 string:", base64String);
+            socket.emit("shareFile", {
+                chatId: activeChat,
+                message: inputMessage,
+                file: file, // Send full Data URL
+                mimeType: file.type,
+            });
+            setSelectedFile(null);
+            setFile(null);
+            setInputMessage("");
         };
-
-        socket.on("shareImage", handleImageMessage);
-        return () => socket.off("shareImage", handleImageMessage);
-    }, []);
-
-    // Handle image upload
-    const sendImage = async () => {
-        imageFile.type;
-
-        socket.emit("shareImage", { chatId: activeChat, message: inputMessage, photo: imageFile, mimeType:  imageFile.type, });
-        setSelectedImage(null); // Clear the selected image after sending
-        setImageFile(null);
-
+        reader.readAsDataURL(file);
     };
+
 
     return (
         <div className="flex h-screen overflow-hidden p-5" id="chat-window">
             <div className="flex-1 flex flex-col">
-                <div className="messages-container p-4 overflow-y-scroll flex-1" id="scrollableDiv">
-                    {messages.map((msg, index) => (
-                        <div
-                            key={index}
-                            className={`message-bubble ${msg.by === activeUserId ? "my-message" : "other-message"}`}
-                        >
-                            {msg.photo_Url && (
-                                <div>
-                                    {imageLoading[index] !== false && (
-                                        <p className="inset-0 flex items-center justify-center text-blue-500">Loading...</p>
-                                    )}
-                                    <img
-                                        src={msg.photo_Url}
-                                        alt="Loading..."
-                                        className={`w-full h-full object-cover rounded-lg ${imageLoading[index] === false ? "block" : "hidden"}`}
-                                        onLoad={() => handleImageLoad(index)}
-                                        onError={() => handleImageError(index)}
+                {messages.length > 0 ? (
+                    <div className="messages-container p-4 overflow-y-scroll flex-1" id="scrollableDiv">
+                        {messages.map((msg, index) => (
+                            <div
+                                key={index}
+                                className={`message-bubble ${msg.by === activeUserId ? "my-message" : "other-message"}`}
+                            >
+                                {msg.file_Url ? (
+                                    <FilePreview
+                                        fileUrl={msg.file_Url}
+                                        index={index}
+                                        imageLoading={imageLoading}
+                                        handleImageLoad={handleImageLoad}
+                                        handleImageError={handleImageError}
                                     />
-                                </div>
-                            )}
-                            <p>{msg.message}</p>
-                            <p className="date">{formatMessageDate(msg.date)}</p>
-                        </div>
-                    ))}
-                </div>
-
-
-                {selectedImage && (
-                    <div className="flex flex-row">
-                        <img
-                            src={selectedImage}
-                            alt="Preview"
-                            className="w-32 h-32 rounded-lg border-2 border-gray-400 object-cover"
-                        />
-                        <button
-                            className="ml-2 p-2 mb-0 w-10 h-10 bg-green-500 text-white rounded"
-                            onClick={sendImage}
-                        >
-                            <FaPaperPlane />
-                        </button>
+                                ) : null}
+                                <p>{msg.message}</p>
+                                <p className="date">{formatMessageDate(msg.date)}</p>
+                            </div>
+                        ))}
                     </div>
+                ) : (
+                    <p></p>
                 )}
+
+                {selectedFile && (
+                    <>
+                        {file && file.type.startsWith("image/") ? (
+                            <div className="flex flex-row items-center">
+                                <img
+                                    src={selectedFile}
+                                    alt="Preview"
+                                    className="w-32 h-32 rounded-lg border-2 border-gray-400 object-cover"
+                                />
+                                <button
+                                    className="ml-2 p-2 w-10 h-10 bg-green-500 text-white rounded"
+                                    onClick={sendFile}
+                                >
+                                    <FaPaperPlane />
+                                </button>
+                            </div>
+                        ) : (
+                            <div className="flex flex-row items-center">
+
+                                <p>{file.name}</p>
+                                <button
+                                    className="ml-2 p-2 w-10 h-10 bg-green-500 text-white rounded"
+                                    onClick={sendFile}
+                                >
+                                    <FaPaperPlane />
+                                </button>
+                            </div>
+                        )}
+                    </>
+                )}
+
+
                 {/* Input Section */}
                 <div className={`p-4 pb-5 mb-5 border-t flex ${activeChat ? "" : "hidden"}`}>
-
                     {/* Image Upload Section */}
                     <div className="pe-5 pt-3">
                         <label htmlFor="img-upload" className="hover:cursor-pointer">
@@ -180,7 +207,7 @@ const ChatWindow = ({ activeChat, activeUserId }) => {
                             type="file"
                             className="hidden"
                             accept="image/png, image/jpeg"
-                            onChange={handleImageChange}
+                            onChange={handleFileChange}
                         />
                     </div>
 
@@ -189,7 +216,7 @@ const ChatWindow = ({ activeChat, activeUserId }) => {
                         <label htmlFor="file-upload" className="hover:cursor-pointer">
                             <FaUpload />
                         </label>
-                        <input id="file-upload" type="file" className="hidden" accept="application/pdf, text/plain" />
+                        <input id="file-upload" type="file" className="hidden" accept="application/pdf, text/plain" onChange={handleFileChange} />
                     </div>
 
                     {/* Message Input */}

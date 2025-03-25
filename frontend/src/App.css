@@ -253,7 +253,7 @@ button:focus {
     white-space: nowrap;
 }
 
-#chat-window img {
+#chat-window .chat-img {
     width: 15rem;
     padding: none;
 }

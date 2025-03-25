@@ -1,6 +1,6 @@
 const { UserChat } = require("../models/models");
 
-const AddMessages = async ({ chatId, message, senderId, photoUrl = null }) => {
+const AddMessages = async ({ chatId, message, senderId, fileUrl = null }) => {
     try {
         const chat = await UserChat.findById(chatId);
         if (!chat) {
@@ -18,7 +18,7 @@ const AddMessages = async ({ chatId, message, senderId, photoUrl = null }) => {
         const newMessage = {
             message: message,
             by: senderId,
-            photo_Url: photoUrl,
+            file_Url: fileUrl,
         };
 
         // Push and save the message
