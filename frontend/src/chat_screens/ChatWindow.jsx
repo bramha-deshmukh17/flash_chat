@@ -1,6 +1,6 @@
-import { useEffect, useState } from "react";
+import { useEffect, useState, useRef } from "react";
 import { io } from "socket.io-client";
-import { FaUpload, FaImage, FaArrowRight, FaPaperPlane } from "react-icons/fa";
+import { FaUpload, FaImage, FaArrowRight, FaPaperPlane, FaArrowDown } from "react-icons/fa";
 import FilePreview from "./FilePreview"; // Import our new component
 
 // Create the socket instance outside the component (shared across renders)
@@ -30,6 +30,8 @@ const ChatWindow = ({ activeChat, activeUserId }) => {
     const [file, setFile] = useState(null);
     const [inputMessage, setInputMessage] = useState("");
     const [imageLoading, setImageLoading] = useState({});
+    const [showScrollButton, setShowScrollButton] = useState(false);
+    const scrollableDivRef = useRef(null);
 
     const handleImageLoad = (index) => {
         setImageLoading((prev) => ({ ...prev, [index]: false }));
@@ -41,10 +43,7 @@ const ChatWindow = ({ activeChat, activeUserId }) => {
 
     // Scroll to the bottom when messages update
     useEffect(() => {
-        let scrollableDiv = document.getElementById("scrollableDiv");
-        if (scrollableDiv) {
-            scrollableDiv.scrollTop = scrollableDiv.scrollHeight;
-        }
+        scrollToBottom();
     }, [messages]);
 
     // Fetch messages for the active chat
@@ -134,12 +133,33 @@ const ChatWindow = ({ activeChat, activeUserId }) => {
         reader.readAsDataURL(file);
     };
 
+    // Handle scroll to bottom
+    const scrollToBottom = () => {
+        let scrollableDiv = scrollableDivRef.current;
+        if (scrollableDiv) {
+            scrollableDiv.scrollTop = scrollableDiv.scrollHeight;
+        }
+    };
+
+    // Show or hide scroll button based on scroll position
+    const handleScroll = () => {
+        let scrollableDiv = scrollableDivRef.current;
+        if (scrollableDiv) {
+            const isScrolledToBottom = scrollableDiv.scrollHeight - scrollableDiv.scrollTop <= scrollableDiv.clientHeight + 1;
+            setShowScrollButton(!isScrolledToBottom);
+        }
+    };
 
     return (
         <div className="flex h-screen overflow-hidden p-5" id="chat-window">
             <div className="flex-1 flex flex-col">
                 {messages.length > 0 ? (
-                    <div className="messages-container p-4 overflow-y-scroll flex-1" id="scrollableDiv">
+                    <div
+                        className="messages-container p-4 overflow-y-scroll flex-1"
+                        id="scrollableDiv"
+                        ref={scrollableDivRef}
+                        onScroll={handleScroll}
+                    >
                         {messages.map((msg, index) => (
                             <div
                                 key={index}
@@ -181,7 +201,6 @@ const ChatWindow = ({ activeChat, activeUserId }) => {
                             </div>
                         ) : (
                             <div className="flex flex-row items-center">
-
                                 <p>{file.name}</p>
                                 <button
                                     className="ml-2 p-2 w-10 h-10 bg-green-500 text-white rounded"
@@ -194,6 +213,15 @@ const ChatWindow = ({ activeChat, activeUserId }) => {
                     </>
                 )}
 
+                {/* Scroll to Bottom Button */}
+                {showScrollButton && (
+                    <button
+                        className="fixed bottom-20 right-1/3  p-3 bg-blue-500 text-white rounded-full shadow-lg"
+                        onClick={scrollToBottom}
+                    >
+                        <FaArrowDown />
+                    </button>
+                )}
 
                 {/* Input Section */}
                 <div className={`p-4 pb-5 mb-5 border-t flex ${activeChat ? "" : "hidden"}`}>
