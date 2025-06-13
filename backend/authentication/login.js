@@ -29,12 +29,13 @@ const LoginUser = async (req, res) => {
         }
 
         const token = jwt.sign({ userId: user._id }, SECRET_KEY, { expiresIn: "24h" });
-        res.cookie("authToken", token, {
-            httpOnly: true,// Can't be accessed from JS
-            secure: false, // Use HTTPS in production and set to true
-            sameSite: "Strict",// Protect against CSRF
-            maxAge: 24 * 60 * 60 * 1000,//24 hours
-        }); 
+        res.cookie('authToken', token, {
+        httpOnly: true,
+        secure: process.env.NODE_ENV === 'production', // only send over HTTPS in prod
+        sameSite: 'none',                              // allow cross-site if front/back on different origins
+        path: '/',                                     // ensure cookie is sent to all routes
+        maxAge: 30 * 24 * 60 * 60 * 1000               // e.g., 30 days
+        });
         res.status(200).json({ message: "Login successful!" });
     } catch (err) {
         console.error("Error logging in:", err);
