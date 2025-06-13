@@ -20,6 +20,7 @@ const { UploadDocument } = require('./chat/uploadDoc');
 const { Setting } = require('./setting/setting');
 const { UpdateProfile } = require('./setting/updateProfile');
 const { UpdatePassword } = require('./setting/updatePassword');
+const { CreateChat } = require('./chat/createChat');
 
 dotenv.config();
 
@@ -36,7 +37,7 @@ mongoose
 const app = express();
 const server = http.createServer(app);
 const io = new Server(server, {
-    maxHttpBufferSize:  10 * 1024 * 1024, // 10MB (adjust as needed)
+    maxHttpBufferSize: 10 * 1024 * 1024, // 10MB (adjust as needed)
     cors: {
         origin: process.env.FRONTEND_URL, // Allow frontend origin
         methods: ['GET', 'POST', 'PUT', 'DELETE'], // Allow specific methods
@@ -56,8 +57,8 @@ app.use(express.json());
 app.use(cookieParser());
 if (process.env.NODE_ENV === 'production') {
     app.set('trust proxy', 1);
-  }
-  
+}
+
 // Socket.io Handling
 io.on("connection", (socket) => {
 
@@ -104,10 +105,10 @@ io.on("connection", (socket) => {
         if (result.success) {
             let by = senderId;
             io.to(chatId).emit("send", { message: { message, by, file_url: null, date: new Date().toISOString() } });
-            
+
         } else {
             socket.emit("error", { error: result.error });
-            
+
         }
     });
 
@@ -150,6 +151,7 @@ app.get('/chats', authenticateToken, ChatList);
 app.get('/chats/search', authenticateToken, SearchChat);
 app.get('/chats/:chatId/getmessages', authenticateToken, Messages);
 app.post('/chats/:chatId/sendimage', authenticateToken, UploadDocument);
+app.post('/chats/create', authenticateToken, CreateChat);
 
 
 app.get('/settings', authenticateToken, Setting);
