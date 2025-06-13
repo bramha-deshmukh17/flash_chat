@@ -54,7 +54,10 @@ const corsOptions = {
 app.use(cors(corsOptions));
 app.use(express.json());
 app.use(cookieParser());
-
+if (process.env.NODE_ENV === 'production') {
+    app.set('trust proxy', 1);
+  }
+  
 // Socket.io Handling
 io.on("connection", (socket) => {
 
@@ -155,4 +158,4 @@ app.post('/update/password', authenticateToken, UpdatePassword);
 
 // Start the Server
 const PORT = process.env.PORT || 3001;
-server.listen(PORT, () => console.log(`Server running on port http://localhost:${PORT}`));
+server.listen(PORT, () => console.log(`Server running on port ${PORT}`));
