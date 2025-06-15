@@ -1,7 +1,7 @@
 import React, { useState } from "react";
 import { FaSearch } from "react-icons/fa";
 
-const ChatList = ({ setActiveChat, chatList, activeChat }) => {
+const ChatList = ({ setActiveChat, chatList, activeChat, setChatList }) => {
     const [searchText, setSearchText] = useState(""); // State for search input
     const [searchChatList, setSearchChatList] = useState([]);
 
@@ -26,6 +26,7 @@ const ChatList = ({ setActiveChat, chatList, activeChat }) => {
 
     const createChatAndOpen = async (otherUserId) => {
         try {
+            // Send a request to create or fetch a chat with the given user
             const res = await fetch(`${URI}chats/create`, {
                 method: 'POST',
                 credentials: 'include',
@@ -33,14 +34,27 @@ const ChatList = ({ setActiveChat, chatList, activeChat }) => {
                 body: JSON.stringify({ otherUserId }),
             });
             const data = await res.json();
+
+            // If the backend returns a chatId, update chat list and set active chat
             if (data.chatId) {
-                setActiveChat(data.chatId);
-                window.location.reload();
+                // Fetch the updated list of chats for this user
+                fetch(`${URI}chats`, {
+                    method: "GET",
+                    credentials: "include",
+                })
+                    .then((res) => res.json())
+                    .then((data2) => {
+                        //  Update the chatList state in parent
+                        if (data2.chats) setChatList(data2.chats);
+                        //  Set the newly created/fetched chat as active
+                        setActiveChat(data.chatId);
+                    });
             }
         } catch (err) {
             console.error('Error creating chat:', err);
         }
     };
+    
 
     return (
         <div id="chat-list">

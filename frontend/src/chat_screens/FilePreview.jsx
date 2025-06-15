@@ -1,6 +1,7 @@
 import { useState, useEffect } from "react";
 import { ref, getMetadata } from "firebase/storage";
 import { storage } from "../firebase"; // Adjust the path as needed
+import { FaDownload } from "react-icons/fa";
 
 // Helper function to extract the relative path from a Firebase URL
 const extractStoragePath = (url) => {
@@ -35,37 +36,64 @@ const FilePreview = ({ fileUrl, index, imageLoading, handleImageLoad, handleImag
     }, [fileUrl]);
 
     if (isImage === null) {
-        return <p className="text-sm text-gray-500">Loading...</p>;
+        return <p className="text-sm text-white">Loading...</p>;
     }
 
     if (isImage) {
+        const filename = decodeURIComponent(fileUrl.split("/").pop().split("?")[0]);
         return (
-            <div className={`relative`}>
-                {imageLoading[index] !== false && (
-                    <p className="absolute inset-0 flex items-center justify-center text-blue-500 text-sm">
-                        Loading...
-                    </p>
-                )}
-                <img
-                    src={fileUrl}
-                    alt="Preview"
-                    className={` rounded-lg chat-img ${imageLoading[index] === false ? "block" : "hidden"}`}
-                    onLoad={() => handleImageLoad(index)}
-                    onError={() => handleImageError(index)}
-                />
+            <div className="flex flex-col items-start space-y-2">
+                <div className="relative">
+                    {/* Download button overlaid at top-right */}
+                    {imageLoading[index] === false && (
+                        <a
+                            href={fileUrl}
+                            className="absolute top-2 right-2 text-blue-500 hover:underline text-sm bg-white bg-opacity-75 rounded p-1"
+                            download={filename}
+                            target="_blank"
+                            rel="noopener noreferrer"
+                            title="Download image"
+                        >
+                            <FaDownload />
+                        </a>
+                    )}
+                    {imageLoading[index] !== false && (
+                        <p className="inset-0 flex p-5 items-center justify-center text-white text-sm rounded-lg">
+                            Loading...
+                        </p>
+                    )}
+                    <img
+                        src={fileUrl}
+                        alt='Not found'
+                        className={`rounded-lg chat-img ${imageLoading[index] === false ? "block" : "hidden"}`}
+                        onLoad={() => handleImageLoad(index)}
+                        onError={() => handleImageError(index)}
+                    />
+                </div>
             </div>
         );
-    } else {
+    }
+     else {
         const file = fileUrl.split("/").pop().split('?')[0];
-        const parts = decodeURIComponent(file).split("/")
+        const parts = decodeURIComponent(file).split("/");
+        const filename = parts[parts.length - 1];
         return (
-            <div className="p-2 rounded">
-                <p className="text-sm font-bold">{parts[parts.length - 1]}</p>
-                <a href={fileUrl} className="text-blue-500 underline text-sm" download={parts[parts.length - 1]} target="_blank" >
-                    Download
+            <div className="pb-2 pt-2 rounded shadow flex items-center space-x-2">
+                <span className="text-sm font-bold">{filename}</span>
+                <a
+                    href={fileUrl}
+                    className="text-blue-500 hover:underline text-sm"
+                    download={filename}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                >
+                    <FaDownload title="Download" />
                 </a>
             </div>
+
         );
+
+
     }
 };
 
