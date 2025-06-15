@@ -1,12 +1,12 @@
 import React, { useState } from "react";
 import { FaSearch } from "react-icons/fa";
 
-const ChatList = ({ setActiveChat , chatList, activeChat }) => {
+const ChatList = ({ setActiveChat, chatList, activeChat }) => {
     const [searchText, setSearchText] = useState(""); // State for search input
     const [searchChatList, setSearchChatList] = useState([]);
 
     const URI = import.meta.env.VITE_API_URL;
-    console.error('chatlist:',chatList);
+    console.error('chatlist:', chatList);
 
     const handleSearch = (e) => {
 
@@ -23,6 +23,24 @@ const ChatList = ({ setActiveChat , chatList, activeChat }) => {
             .catch((error) => console.error('Search error:', error.message));
 
     }
+
+    const createChatAndOpen = async (otherUserId) => {
+        try {
+            const res = await fetch(`${URI}chats/create`, {
+                method: 'POST',
+                credentials: 'include',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ otherUserId }),
+            });
+            const data = await res.json();
+            if (data.chatId) {
+                setActiveChat(data.chatId);
+                window.location.reload();
+            }
+        } catch (err) {
+            console.error('Error creating chat:', err);
+        }
+    };
 
     return (
         <div id="chat-list">
@@ -70,7 +88,12 @@ const ChatList = ({ setActiveChat , chatList, activeChat }) => {
                                 <h2>Email</h2>
                                 {searchChatList.emailMatches.map((match) => (
                                     <li key={match._id}>
-                                        <span className="email">{match.email}</span>
+                                        <button
+                                            className="email"
+                                            onClick={() => createChatAndOpen(match._id)}
+                                        >
+                                            {match.email}
+                                        </button>
                                     </li>
                                 ))}
                             </>
@@ -78,19 +101,20 @@ const ChatList = ({ setActiveChat , chatList, activeChat }) => {
                             <p></p>
                         )}
                     </ul>
-
-
                     <ul>
                         {searchChatList.usernameMatches && searchChatList.usernameMatches.length > 0 ? (
                             <>
                                 <h2>Username</h2>
-                                {
-                                    searchChatList.usernameMatches.map((match) => (
-                                        <li key={match._id}>
-                                            <span className="username">{match.username}</span>
-                                        </li>
-                                    ))
-                                }
+                                {searchChatList.usernameMatches.map((match) => (
+                                    <li key={match._id}>
+                                        <button
+                                            className="username"
+                                            onClick={() => createChatAndOpen(match._id)}
+                                        >
+                                            {match.username}
+                                        </button>
+                                    </li>
+                                ))}
                             </>
                         ) : (
                             <p></p>
@@ -98,21 +122,21 @@ const ChatList = ({ setActiveChat , chatList, activeChat }) => {
                     </ul>
                 </div>
             ) : (
-                    <ul>
-                        {chatList && chatList.length > 0 ? (
-                            <>
-                                {chatList.map((chat) => (
-                                    <li key={chat.chatId} onClick={() => setActiveChat(chat.chatId)} style={{ backgroundColor: `${activeChat == chat.chatId ? "#293545" : ""}` }}>
-                                        <div className="chat-details">
-                                            <span className="username">{chat.userDetails.username}</span>
-                                        </div>
-                                    </li>
-                                ))}
-                            </>
-                        ) : (
-                            <p>Search People for chatting</p>
-                        )}
-                    </ul>
+                <ul>
+                    {chatList && chatList.length > 0 ? (
+                        <>
+                            {chatList.map((chat) => (
+                                <li key={chat.chatId} onClick={() => setActiveChat(chat.chatId)} style={{ backgroundColor: `${activeChat == chat.chatId ? "#293545" : ""}` }}>
+                                    <div className="chat-details">
+                                        <span className="username">{chat.userDetails.username}</span>
+                                    </div>
+                                </li>
+                            ))}
+                        </>
+                    ) : (
+                        <p>Search People for chatting</p>
+                    )}
+                </ul>
 
             )}
         </div>

@@ -286,6 +286,7 @@ export const Password = () => {
 
 
     const handleSubmit = async (e) => {
+        const URI = import.meta.env.VITE_API_URL;
         e.preventDefault(); // Prevent page refresh
         if (!password.oldPassword || !password.newPassword || !password.cnfPassword) {
             setError("All fields are required");
@@ -360,7 +361,7 @@ export const PrivacyPolicy = () => {
 };
 
 export const Logout = () => {
-
+    const URI = import.meta.env.VITE_API_URL;
     const logout = async () => {
         fetch(`${URI}logout`, {
             method: "POST",

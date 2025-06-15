@@ -6,7 +6,7 @@ const cookieParser = require('cookie-parser');
 const http = require("http");
 const { Server } = require("socket.io");
 const jwt = require("jsonwebtoken");
-const cookie = require("cookie"); // ✅ Import this for WebSocket cookie parsing
+const cookie = require("cookie"); // Import this for WebSocket cookie parsing
 const { RegisterUser } = require('./authentication/register');
 const { LoginUser } = require('./authentication/login');
 const { limiter } = require('./authentication/limiter');
@@ -20,6 +20,8 @@ const { UploadDocument } = require('./chat/uploadDoc');
 const { Setting } = require('./setting/setting');
 const { UpdateProfile } = require('./setting/updateProfile');
 const { UpdatePassword } = require('./setting/updatePassword');
+const { CreateChat } = require('./chat/createChat');
+const path = require('path');
 
 dotenv.config();
 
@@ -36,7 +38,7 @@ mongoose
 const app = express();
 const server = http.createServer(app);
 const io = new Server(server, {
-    maxHttpBufferSize:  10 * 1024 * 1024, // 10MB (adjust as needed)
+    maxHttpBufferSize: 10 * 1024 * 1024, // 10MB (adjust as needed)
     cors: {
         origin: process.env.FRONTEND_URL, // Allow frontend origin
         methods: ['GET', 'POST', 'PUT', 'DELETE'], // Allow specific methods
@@ -54,6 +56,9 @@ const corsOptions = {
 app.use(cors(corsOptions));
 app.use(express.json());
 app.use(cookieParser());
+if (process.env.NODE_ENV === 'production') {
+    app.set('trust proxy', 1);
+}
 
 // Socket.io Handling
 io.on("connection", (socket) => {
@@ -101,10 +106,10 @@ io.on("connection", (socket) => {
         if (result.success) {
             let by = senderId;
             io.to(chatId).emit("send", { message: { message, by, file_url: null, date: new Date().toISOString() } });
-            
+
         } else {
             socket.emit("error", { error: result.error });
-            
+
         }
     });
 
@@ -140,19 +145,37 @@ app.post('/user/register', RegisterUser);
 app.get('/user/login/check', authenticateToken, LoginCheck);
 app.post('/user/login', limiter, LoginUser);
 app.post('/logout', (req, res) => {
-    res.clearCookie('authToken').status(200).json({ message: 'Logged out successfully' });
+    if (process.env.NODE_ENV === 'production') {
+        res.clearCookie('authToken', {
+            httpOnly: true,
+            secure: true,
+            sameSite: 'none',
+            path: '/',
+        }).status(200).json({ message: 'Logged out successfully' });
+    } else {
+        res.clearCookie('authToken').status(200).json({ message: 'Logged out successfully' });
+    }
 });
 
 app.get('/chats', authenticateToken, ChatList);
 app.get('/chats/search', authenticateToken, SearchChat);
 app.get('/chats/:chatId/getmessages', authenticateToken, Messages);
 app.post('/chats/:chatId/sendimage', authenticateToken, UploadDocument);
+app.post('/chats/create', authenticateToken, CreateChat);
 
 
 app.get('/settings', authenticateToken, Setting);
 app.post('/update/profile', authenticateToken, UpdateProfile);
 app.post('/update/password', authenticateToken, UpdatePassword);
 
+// Serve static files from the React app
+app.use(express.static(path.join(__dirname, '../frontend/dist')));
+
+// SPA fallback: serve index.html for any unknown route
+app.get('*', (req, res) => {
+    res.sendFile(path.join(__dirname, '../frontend/dist', 'index.html'));
+});
+
 // Start the Server
 const PORT = process.env.PORT || 3001;
-server.listen(PORT, () => console.log(`Server running on port http://localhost:${PORT}`));
+server.listen(PORT, () => console.log(`Server running on port ${PORT}`));
