@@ -16,11 +16,13 @@ const SearchChat = async (req, res) => {
     // Search for users by username, excluding the password field
     const usernameMatches = await User.find({
         username: { $regex: search, $options: "i" }, // Case-insensitive search
+        _id: { $ne: loggedInUserId } // Exclude the logged-in user
     }).select("_id username bio img_url"); // Exclude password
 
     // Search for users by email, excluding the password field
     const emailMatches = await User.find({
         email: { $regex: search, $options: "i" }, // Case-insensitive search
+        _id: { $ne: loggedInUserId } // Exclude the logged-in user
     }).select("_id email bio img_url"); // Exclude password
 
     // Combine results and extract unique IDs

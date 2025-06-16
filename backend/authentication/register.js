@@ -2,10 +2,6 @@ const bcrypt = require("bcrypt");
 const { User } = require("../models/models");
 
 const RegisterUser = async (req, res) => {
-    // Block registration if not in development
-    if (process.env.NODE_ENV !== "development") {
-        return res.status(403).json({ error: "Registration is disabled." });
-    }
 
     const { username, email, password, confirmPassword } = req.body;
 
