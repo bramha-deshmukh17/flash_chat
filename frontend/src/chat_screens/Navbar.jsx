@@ -14,9 +14,17 @@ const Navbar = () => {
     };
 
     return (
-        <div 
+        <div
             id="sidebar"
-            className={`h-screen ${isCollapsed ? "w-16" : "w-64"} flex flex-col transition-all duration-300`}
+            className={`
+                flex flex-col
+                transition-all duration-300
+                ${isCollapsed ? "w-16" : "w-64"}
+                min-h-0 h-screen
+                bg-gray-800
+                overflow-y-auto
+            `}
+            style={{ minWidth: isCollapsed ? "4rem" : "16rem" }}
         >
             {/* Sidebar Header */}
             <div className="flex items-center justify-between p-4 pl-3 ml-2">

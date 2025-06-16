@@ -151,16 +151,18 @@ const ChatWindow = ({ activeChat, activeUserId }) => {
     };
 
     return (
-        <div className="flex h-screen overflow-hidden p-5" id="chat-window">
-            <div className="flex-1 flex flex-col">
-                {messages.length > 0 ? (
-                    <div
-                        className="messages-container p-4 overflow-y-scroll flex-1"
-                        id="scrollableDiv"
-                        ref={scrollableDivRef}
-                        onScroll={handleScroll}
-                    >
-                        {messages.map((msg, index) => (
+        <div className="flex h-full w-full overflow-hidden" id="chat-window">
+            <div className="flex-1 flex flex-col relative h-full">
+                {/* Messages */}
+                <div
+                    className="messages-container p-2 sm:p-4 overflow-y-scroll flex-1"
+                    id="scrollableDiv"
+                    ref={scrollableDivRef}
+                    onScroll={handleScroll}
+                    style={{ paddingBottom: "5rem", marginBottom:'3rem' }} // enough space for input bar
+                >
+                    {messages.length > 0 ? (
+                        messages.map((msg, index) => (
                             <div
                                 key={index}
                                 className={`message-bubble ${msg.by === activeUserId ? "my-message" : "other-message"}`}
@@ -177,16 +179,17 @@ const ChatWindow = ({ activeChat, activeUserId }) => {
                                 <p>{msg.message}</p>
                                 <p className="date">{formatMessageDate(msg.date)}</p>
                             </div>
-                        ))}
-                    </div>
-                ) : (
-                    <p></p>
-                )}
+                        ))
+                    ) : (
+                        <div className="flex-1" />
+                    )}
+                </div>
 
+                {/* File/Image Preview (unchanged) */}
                 {selectedFile && (
                     <>
                         {file && file.type.startsWith("image/") ? (
-                            <div className="flex flex-row items-center">
+                            <div className="flex flex-row items-center absolute left-0 w-full bottom-28 sm:bottom-32 z-50 p-2 border-t" style={{ backgroundColor: "var(--bg-color)" }}>
                                 <img
                                     src={selectedFile}
                                     alt="Preview"
@@ -198,15 +201,37 @@ const ChatWindow = ({ activeChat, activeUserId }) => {
                                 >
                                     <FaPaperPlane />
                                 </button>
+                                {/* Clear Button */}
+                                <button
+                                    className="ml-auto p-2 w-10 h-10 bg-red-500 text-white rounded"
+                                    title="Clear"
+                                    onClick={() => {
+                                        setSelectedFile(null);
+                                        setFile(null);
+                                    }}
+                                >
+                                    &#10006;
+                                </button>
                             </div>
                         ) : (
-                            <div className="flex flex-row items-center">
-                                <p>{file.name}</p>
+                            <div className="flex flex-row items-center absolute left-0 w-full bottom-28 sm:bottom-32 z-50 p-2 border-t" style={{ backgroundColor: "var(--bg-color)" }}>
+                                <p className="truncate">{file?.name}</p>
                                 <button
                                     className="ml-2 p-2 w-10 h-10 bg-green-500 text-white rounded"
                                     onClick={sendFile}
                                 >
                                     <FaPaperPlane />
+                                </button>
+                                {/* Clear Button */}
+                                <button
+                                    className="ml-auto p-2 w-10 h-10 bg-red-500 text-white rounded"
+                                    title="Clear"
+                                    onClick={() => {
+                                        setSelectedFile(null);
+                                        setFile(null);
+                                    }}
+                                >
+                                    &#10006;
                                 </button>
                             </div>
                         )}
@@ -216,7 +241,7 @@ const ChatWindow = ({ activeChat, activeUserId }) => {
                 {/* Scroll to Bottom Button */}
                 {showScrollButton && (
                     <button
-                        className="fixed bottom-20 right-1/3  p-3 bg-blue-500 text-white rounded-full shadow-lg"
+                        className="fixed bottom-20 right-1/3 p-3 bg-blue-500 text-white rounded-full shadow-lg"
                         onClick={scrollToBottom}
                     >
                         <FaArrowDown />
@@ -224,9 +249,12 @@ const ChatWindow = ({ activeChat, activeUserId }) => {
                 )}
 
                 {/* Input Section */}
-                <div className={`p-4 pb-5 mb-5 border-t flex ${activeChat ? "" : "hidden"}`}>
-                    {/* Image Upload Section */}
-                    <div className="pe-5 pt-3">
+                <div
+                    className={`p-2  border-t flex items-center gap-2 absolute bottom-0 left-0 w-full  z-50 overflow-x-auto ${activeChat ? "" : "hidden"}`}
+                    style={{ minHeight: "4.5rem", marginBottom: "3rem", backgroundColor: "var(--bg-color)" }}
+                >
+                    {/* Image Upload */}
+                    <div className="pt-1">
                         <label htmlFor="img-upload" className="hover:cursor-pointer">
                             <FaImage />
                         </label>
@@ -239,8 +267,8 @@ const ChatWindow = ({ activeChat, activeUserId }) => {
                         />
                     </div>
 
-                    {/* File Upload Section */}
-                    <div className="pe-5 pt-3">
+                    {/* File Upload */}
+                    <div className="pt-1">
                         <label htmlFor="file-upload" className="hover:cursor-pointer">
                             <FaUpload />
                         </label>
@@ -250,7 +278,7 @@ const ChatWindow = ({ activeChat, activeUserId }) => {
                     {/* Message Input */}
                     <input
                         type="text"
-                        className="flex-1 border p-2 rounded"
+                        className="flex-1 border p-2 rounded min-w-0"
                         placeholder="Enter a message..."
                         value={inputMessage}
                         onChange={(e) => setInputMessage(e.target.value)}
@@ -261,7 +289,7 @@ const ChatWindow = ({ activeChat, activeUserId }) => {
                     />
 
                     {/* Send Button */}
-                    <button className="ml-3 ps-3 pe-3 bg-blue-500 text-white rounded" onClick={sendMessage}>
+                    <button className="ml-1 sm:ml-3 px-3 py-2 bg-blue-500 text-white rounded flex-shrink-0" onClick={sendMessage}>
                         <FaArrowRight />
                     </button>
                 </div>

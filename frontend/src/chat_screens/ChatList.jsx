@@ -74,7 +74,6 @@ const ChatList = ({ setActiveChat, chatList, activeChat, setChatList }) => {
 
             {searchText.trim() ? (
                 <div className="search-chat-list">
-
                     <ul>
                         {searchChatList.chats && searchChatList.chats.length > 0 ? (
                             <>
@@ -89,13 +88,8 @@ const ChatList = ({ setActiveChat, chatList, activeChat, setChatList }) => {
                                     </li>
                                 ))}
                             </>
-                        ) : (
-                            <p></p>
-                        )}
-
+                        ) : null}
                     </ul>
-
-
                     <ul>
                         {searchChatList.emailMatches && searchChatList.emailMatches.length > 0 ? (
                             <>
@@ -111,9 +105,7 @@ const ChatList = ({ setActiveChat, chatList, activeChat, setChatList }) => {
                                     </li>
                                 ))}
                             </>
-                        ) : (
-                            <p></p>
-                        )}
+                        ) : null}
                     </ul>
                     <ul>
                         {searchChatList.usernameMatches && searchChatList.usernameMatches.length > 0 ? (
@@ -130,10 +122,15 @@ const ChatList = ({ setActiveChat, chatList, activeChat, setChatList }) => {
                                     </li>
                                 ))}
                             </>
-                        ) : (
-                            <p></p>
-                        )}
+                        ) : null}
                     </ul>
+                    {/* Not found message */}
+                    {( (!searchChatList.chats || searchChatList.chats.length === 0) &&
+                        (!searchChatList.emailMatches || searchChatList.emailMatches.length === 0) &&
+                        (!searchChatList.usernameMatches || searchChatList.usernameMatches.length === 0)
+                    ) && (
+                        <div className="text-center text-red-500 py-4">No results found.</div>
+                    )}
                 </div>
             ) : (
                 <ul>
@@ -148,7 +145,7 @@ const ChatList = ({ setActiveChat, chatList, activeChat, setChatList }) => {
                             ))}
                         </>
                     ) : (
-                        <p>Search People for chatting</p>
+                        <p className="px-5">Search People for chatting</p>
                     )}
                 </ul>
 

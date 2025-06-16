@@ -156,12 +156,12 @@ const Register = () => {
                 {validationError.email && <span className="text-red-500">{validationError.email}</span>}
                 <br />
 
-                <div className="relative w-1/4" style={{ minWidth: '25%' }}>
+                <div className="relative " style={{ minWidth: '25%' }}>
                     <input
-                        type={showPass ? "text" : "password"} // Toggle input type
+                        type={showPass ? "text" : "password"}
                         id="password"
                         placeholder="Password*"
-                        className="bg-gray-600 p-3 rounded text-white pr-12 w-full"
+                        className="bg-gray-600 p-3 rounded text-white w-full"
                         onChange={validatePassword}
                         required
                     />
@@ -170,6 +170,7 @@ const Register = () => {
                         onClick={showPassword}
                         className="absolute right-0 top-1/2 transform -translate-y-1/2 p-3"
                         style={{ background: 'none', border: 'none', outline: 'none' }}
+                        tabIndex={-1}
                     >
                         {showPass ? (
                             <FaEye className="text-white" />
@@ -192,7 +193,7 @@ const Register = () => {
                 {validationError.confirmPassword && <span className="text-red-500">{validationError.confirmPassword}</span>}
                 <br />
                 {error && <p className="text-red-500"> {error}</p>}<br />
-                <button type='submit' className="bg-yellow-500 p-3 rounded text-white" style={{ width: '17%' }}>Register</button>
+                <button type='submit' className="bg-yellow-500 p-3 rounded text-white" style={{ width: '20%' }}>Register</button>
             </form>
         </div>
     );

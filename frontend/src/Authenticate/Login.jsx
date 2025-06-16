@@ -122,12 +122,12 @@ const Login = () => {
                 />
                 {validationError.username && <span className="text-red-500">{validationError.username}</span>}
                 <br />
-                <div className="relative w-1/4" style={{ minWidth: '25%' }}>
+                <div className="relative" style={{ minWidth: '25%' }}>
                     <input
                         type={showPass ? "text" : "password"} // Toggle input type
                         id="password"
                         placeholder="Password*"
-                        className="bg-gray-600 p-3 rounded text-white pr-12 w-full"
+                        className="bg-gray-600 p-3 rounded text-white w-full"
                         onChange={validatePassword}
                         required
                     />
@@ -147,7 +147,7 @@ const Login = () => {
                 {validationError.password && <span className="text-red-500">{validationError.password}</span>}
                 <br />
                 {error && <p className="text-red-500">{error}</p>}
-                <button type='submit' className="bg-yellow-500 p-3 rounded text-white" style={{ width: '17%' }}>Login</button>
+                <button type='submit' className="bg-yellow-500 p-3 rounded text-white" style={{ minWidth: '20%' }}>Login</button>
             </form>
         </div>
     );

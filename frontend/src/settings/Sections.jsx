@@ -161,17 +161,16 @@ export const Profile = ({ userData, setUserData }) => {
     };
 
     return (
-        <div className="p-5">
+        <div className="p-2 sm:p-5">
             <h1 className="head">Profile</h1>
-            <div className="section-info grid grid-cols-12 gap-6">
+            <div className="section-info grid grid-cols-1 sm:grid-cols-12 gap-6">
                 {/* Left Column: Profile Image and Edit Icon */}
-                <div className="col-span-4 flex justify-center items-center relative">
+                <div className="sm:col-span-4 flex justify-center items-center relative mb-4 sm:mb-0">
                     <img
                         src={selectedImage}
                         alt="profile"
-                        className="w-32 h-32 rounded-full border-4 border-gray-600 object-cover"
+                        className="w-24 h-24 sm:w-32 sm:h-32 rounded-full border-4 border-gray-600 object-cover"
                     />
-                    {/* Hidden File Input */}
                     <input
                         type="file"
                         accept="image/*"
@@ -179,7 +178,6 @@ export const Profile = ({ userData, setUserData }) => {
                         className="hidden"
                         id="imageUpload"
                     />
-                    {/* Show edit icon only when in editing mode */}
                     {isEditing && (
                         <label
                             htmlFor="imageUpload"
@@ -189,26 +187,25 @@ export const Profile = ({ userData, setUserData }) => {
                         </label>
                     )}
                 </div>
-
                 {/* Right Column: Profile Details */}
-                <div className="col-span-8">
-                    {/* Toggle Edit Mode Button */}
+                <div className="sm:col-span-8">
                     <button
-                        className="me-5 px-4 py-2 bg-blue-500 text-white rounded-md hover:bg-blue-600"
+                        className={`me-2 mb-2 sm:me-5 px-4 py-2 ${isEditing
+                                ? "bg-red-600 hover:bg-red-800"
+                                : "bg-blue-600 hover:bg-blue-800"
+                            } text-white rounded-md`}
                         onClick={handleEditToggle}
                     >
                         {isEditing ? "Cancel" : "Edit"}
                     </button>
-                    {/* Save Button, visible only in editing mode */}
                     {isEditing && (
                         <button
-                            className="px-4 py-2 bg-green-500 text-white rounded-md hover:bg-green-600"
+                            className="mb-2 px-4 py-2 bg-green-500 text-white rounded-md hover:bg-green-600"
                             onClick={saveUserData}
                         >
                             Save
                         </button>
                     )}
-                    {/* Username */}
                     <h1 className="mt-4">Username:</h1>
                     <input
                         type="text"
@@ -217,11 +214,9 @@ export const Profile = ({ userData, setUserData }) => {
                         value={editedData.username}
                         onChange={handleChange}
                         disabled={!isEditing}
-                        className="border p-2 rounded-md w-1/2"
+                        className="border p-2 rounded-md w-full sm:w-1/2"
                     /><br />
                     {validationError.username && <span className="text-red-500">{validationError.username}</span>}
-
-                    {/* Email */}
                     <h1 className="mt-4">Email:</h1>
                     <input
                         type="email"
@@ -230,11 +225,10 @@ export const Profile = ({ userData, setUserData }) => {
                         value={editedData.email}
                         onChange={handleChange}
                         disabled={!isEditing}
-                        className="border p-2 rounded-md w-1/2"
+                        className="border p-2 rounded-md w-full sm:w-1/2"
                     /><br />
                     {validationError.email && <span className="text-red-500">{validationError.email}</span>}<br />
                     {error && <p className="text-red-500"> {error}</p>}<br />
-                    {/* Joined Date */}
                     <h1 className="mt-4">
                         Joined on: <FormatDate dateString={userData.createdAt} />
                     </h1>
@@ -320,49 +314,136 @@ export const Password = () => {
             });
     }
     return (
-        <div className="p-5">
+        <div className="p-2 sm:p-5">
             <h1 className="head">Update Password</h1>
             <form onSubmit={handleSubmit}>
-                <input type='password' name="oldPassword" onChange={validatePassword} className="w-1/2" placeholder="Enter old password" /><br />
+                <input type='password' name="oldPassword" onChange={validatePassword} className="w-full sm:w-1/2 mb-2" placeholder="Enter old password" /><br />
                 {validationError.oldPassword && <span className="text-red-500">{validationError.oldPassword}</span>}<br />
-                <input type='password' name="newPassword" id="newPassword" onChange={validatePassword} className="w-1/2" placeholder="Enter New password" /><br />
+                <input type='password' name="newPassword" id="newPassword" onChange={validatePassword} className="w-full sm:w-1/2 mb-2" placeholder="Enter New password" /><br />
                 {validationError.newPassword && <span className="text-red-500">{validationError.newPassword}</span>}<br />
-                <input type='password' name="cnfPassword" onChange={validatePassword} className="w-1/2" placeholder="Confirm password" /><br />
+                <input type='password' name="cnfPassword" onChange={validatePassword} className="w-full sm:w-1/2 mb-2" placeholder="Confirm password" /><br />
                 {validationError.cnfPassword && <span className="text-red-500">{validationError.cnfPassword}</span>}<br />
                 {error && <><p className="text-red-500"> {error}</p><br /></>}
-                <button type="submit" className="me-5 mt-5 px-4 py-2 bg-blue-500 text-white rounded-md hover:bg-blue-600">Update Password</button>
+                <button type="submit" className="me-2 mt-5 px-4 py-2 bg-blue-500 text-white rounded-md hover:bg-blue-600 w-full sm:w-auto">Update Password</button>
             </form>
         </div>
     );
-
 };
 
 export const Theme = () => {
-
     const { theme, toggleDarkMode } = useTheme();
     return (
-        <div>
+        <div className="p-2 sm:p-5">
             <h1 className="head">Theme</h1><br/>
             <p>Switch between light and dark themes.</p><br/>
-            <button onClick={toggleDarkMode} className="bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded">  Toggle Dark Mode</button>
+            <button
+                onClick={toggleDarkMode}
+                className="bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded w-full sm:w-auto"
+            >
+                Toggle Dark Mode
+            </button>
         </div>
     );
 };
 
 export const PrivacyPolicy = () => {
-
     return (
-        <div>
+        <div className="p-2 sm:p-5 max-h-[70vh] overflow-y-auto rounded">
             <h1 className="head">Privacy Policy</h1>
-            <p>Read our privacy policy here.</p>
+            <div className="space-y-4 text-sm sm:text-base default">
+                <p>
+                    Thank you for using our chatting application ("App", "Service"). Your privacy is important to us. This Privacy Policy explains how we collect, use, and protect your information when you use our services.
+                </p>
+                <hr />
+                <h3 className="font-bold" style={{color:'var(--secondary-text)'}}>1. Information We Collect</h3>
+                <h3 className="font-semibold">a. Personal Information</h3>
+                <ul className="list-disc ml-6">
+                    <li>Name, email address, and profile information (from Auth0 or similar providers)</li>
+                    <li>Device information and IP address</li>
+                    <li>Any content you send or receive through chat (text, images, files)</li>
+                </ul>
+                <h3 className="font-semibold">b. Usage Data</h3>
+                <ul className="list-disc ml-6">
+                    <li>Timestamps of messages</li>
+                    <li>Chat room IDs</li>
+                    <li>Activity logs (login/logout, errors)</li>
+                </ul>
+                <hr />
+                <h3 className="font-bold" style={{color:'var(--secondary-text)'}}>2. How We Use Your Information</h3>
+                <p>
+                    We use the collected data to:
+                </p>
+                <ul className="list-disc ml-6">
+                    <li>Provide and maintain the chat service</li>
+                    <li>Enable file sharing and media previews</li>
+                    <li>Improve app performance and troubleshoot issues</li>
+                    <li>Protect against fraud and abuse</li>
+                </ul>
+                <hr />
+                <h3 className="font-bold" style={{color:'var(--secondary-text)'}}>3. File and Media Handling</h3>
+                <p>
+                    Files (including images and documents) shared through the chat are stored securely using <strong>Firebase Storage</strong>. We do not scan or analyze your private files or chats unless required for security or legal compliance.
+                </p>
+                <hr />
+                <h3 className="font-bold" style={{color:'var(--secondary-text)'}}>4. Data Sharing</h3>
+                <p>
+                    We do <strong>not sell</strong> or share your personal data with third parties for marketing purposes. However, we may share limited information:
+                </p>
+                <ul className="list-disc ml-6">
+                    <li>With service providers (e.g., Firebase, MongoDB Atlas) under strict data agreements</li>
+                    <li>To comply with legal obligations or protect our rights</li>
+                </ul>
+                <hr />
+                <h3 className="font-bold" style={{color:'var(--secondary-text)'}}>5. Cookies and Tracking</h3>
+                <p>
+                    We may use cookies or local storage to:
+                </p>
+                <ul className="list-disc ml-6">
+                    <li>Keep you logged in</li>
+                    <li>Remember chat preferences</li>
+                    <li>Analyze app usage patterns</li>
+                </ul>
+                <p>
+                    You can manage cookies in your browser settings.
+                </p>
+                <hr />
+                <h3 className="font-bold" style={{color:'var(--secondary-text)'}}>6. Security</h3>
+                <p>
+                    We use encryption, secure connections (HTTPS), and authenticated access (e.g., via Auth0) to protect your data. However, no method is 100% secure — use caution when sharing sensitive content.
+                </p>
+                <hr />
+                <h3 className="font-bold" style={{color:'var(--secondary-text)'}}>7. Your Rights</h3>
+                <p>
+                    You can:
+                </p>
+                <ul className="list-disc ml-6">
+                    <li>Request to access or delete your data</li>
+                    <li>Withdraw consent by deleting your account</li>
+                    <li>Contact us for privacy concerns at [Insert Contact Email]</li>
+                </ul>
+                <hr />
+                <h3 className="font-bold" style={{color:'var(--secondary-text)'}}>8. Changes to This Policy</h3>
+                <p>
+                    We may update this policy occasionally. You’ll be notified of major changes via in-app alerts or email.
+                </p>
+                <hr />
+                <h3 className="font-bold" style={{color:'var(--secondary-text)'}}>9. Contact</h3>
+                <p>
+                    If you have questions, contact us at:<br />
+                    <strong>Email:</strong> [Insert Support Email]<br />
+                    <strong>Developer/Team:</strong> [Your Name or Company Name]
+                </p>
+                <hr />
+                <p>Thank you for trusting us with your privacy.</p>
+            </div>
         </div>
     );
-
 };
 
 export const Logout = () => {
     const URI = import.meta.env.VITE_API_URL;
-    const logout = async () => {
+    const logout = async (e) => {
+        e.preventDefault();
         fetch(`${URI}logout`, {
             method: "POST",
             credentials: "include",
@@ -375,11 +456,13 @@ export const Logout = () => {
     };
 
     return (
-        <form onSubmit={logout} className="p-4">
-            <button type='submit' className="bg-red-500 p-3 rounded text-white" style={{ width: '17%' }}>Logout</button>
-            
+        <form onSubmit={logout} className="p-4 flex justify-center">
+            <button
+                type='submit'
+                className="bg-red-500 p-3 rounded text-white w-full sm:w-1/5"
+            >
+                Logout
+            </button>
         </form>
-
     );
-
 };
