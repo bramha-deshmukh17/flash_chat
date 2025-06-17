@@ -340,7 +340,7 @@ export const Theme = () => {
                 onClick={toggleDarkMode}
                 className="bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded w-full sm:w-auto"
             >
-                Toggle Dark Mode
+                Toggle {theme === "dark" ? "Light" : "Dark"} Theme
             </button>
         </div>
     );
@@ -352,14 +352,13 @@ export const PrivacyPolicy = () => {
             <h1 className="head">Privacy Policy</h1>
             <div className="space-y-4 text-sm sm:text-base default">
                 <p>
-                    Thank you for using our chatting application ("App", "Service"). Your privacy is important to us. This Privacy Policy explains how we collect, use, and protect your information when you use our services.
+                    Thank you for using our chatting application. Your privacy is important to us. This Privacy Policy explains how we collect, use, and protect your information when you use our services.
                 </p>
                 <hr />
                 <h3 className="font-bold" style={{color:'var(--secondary-text)'}}>1. Information We Collect</h3>
                 <h3 className="font-semibold">a. Personal Information</h3>
                 <ul className="list-disc ml-6">
-                    <li>Name, email address, and profile information (from Auth0 or similar providers)</li>
-                    <li>Device information and IP address</li>
+                    <li>Name, email address, and profile information</li>
                     <li>Any content you send or receive through chat (text, images, files)</li>
                 </ul>
                 <h3 className="font-semibold">b. Usage Data</h3>
@@ -409,7 +408,7 @@ export const PrivacyPolicy = () => {
                 <hr />
                 <h3 className="font-bold" style={{color:'var(--secondary-text)'}}>6. Security</h3>
                 <p>
-                    We use encryption, secure connections (HTTPS), and authenticated access (e.g., via Auth0) to protect your data. However, no method is 100% secure — use caution when sharing sensitive content.
+                    We use encryption, secure connections (HTTPS), and authenticated access to protect your data. However, no method is 100% secure — use caution when sharing sensitive content.
                 </p>
                 <hr />
                 <h3 className="font-bold" style={{color:'var(--secondary-text)'}}>7. Your Rights</h3>
@@ -418,8 +417,7 @@ export const PrivacyPolicy = () => {
                 </p>
                 <ul className="list-disc ml-6">
                     <li>Request to access or delete your data</li>
-                    <li>Withdraw consent by deleting your account</li>
-                    <li>Contact us for privacy concerns at [Insert Contact Email]</li>
+                    <li>Contact us for privacy concerns at support@flashchat.com</li>
                 </ul>
                 <hr />
                 <h3 className="font-bold" style={{color:'var(--secondary-text)'}}>8. Changes to This Policy</h3>
@@ -430,8 +428,8 @@ export const PrivacyPolicy = () => {
                 <h3 className="font-bold" style={{color:'var(--secondary-text)'}}>9. Contact</h3>
                 <p>
                     If you have questions, contact us at:<br />
-                    <strong>Email:</strong> [Insert Support Email]<br />
-                    <strong>Developer/Team:</strong> [Your Name or Company Name]
+                    <strong>Email:</strong> support@flashchat.com<br />
+                    <strong>Developer/Team:</strong> FlashChat Team
                 </p>
                 <hr />
                 <p>Thank you for trusting us with your privacy.</p>

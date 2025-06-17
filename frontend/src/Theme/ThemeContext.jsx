@@ -8,16 +8,18 @@ export const useTheme = () => useContext(ThemeContext);
 
 // ThemeProvider to wrap the app
 export const ThemeProvider = ({ children }) => {
-    const [theme, setTheme] = useState("dark");
+    // Initialize theme from localStorage or default to "dark"
+    const [theme, setTheme] = useState(() => localStorage.getItem("theme") || "dark");
 
     // Toggle theme function
     const toggleDarkMode = () => {
         setTheme((prevTheme) => (prevTheme === "light" ? "dark" : "light"));
     };
 
-    // Apply the theme to the body class
+    // Apply the theme to the body class and store in localStorage
     useEffect(() => {
         document.body.className = theme;
+        localStorage.setItem("theme", theme);
     }, [theme]);
 
     return (
