@@ -188,11 +188,11 @@ app.post('/update/profile', authenticateToken, UpdateProfile);
 app.post('/update/password', authenticateToken, UpdatePassword);
 
 // Serve static files from the React app
-app.use(express.static(path.join(__dirname, 'public')));
+app.use(express.static(path.join(__dirname, 'dist')));
 
 // SPA fallback: serve index.html for any unknown route
 app.get('*', (req, res) => {
-    res.sendFile(path.join(__dirname, 'public', 'index.html'));
+    res.sendFile(path.join(__dirname, 'dist', 'index.html'));
 });
 
 // Start the Server

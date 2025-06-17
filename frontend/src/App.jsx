@@ -7,7 +7,7 @@ import Login from './Authenticate/Login';
 import Chats from './chat_screens/Chats'
 import Setting from './settings/Setting'
 import ErrorBoundary from "./ErrorBoundary";
-
+import NotFound from "./NotFound";
 function App() {
   return (
     <ErrorBoundary>
@@ -19,7 +19,7 @@ function App() {
             <Route path="/login" element={<Login />} />
             <Route path="/chats" element={<Chats />} />
             <Route path="/settings" element={<Setting />} />
-            
+            <Route path="*" element={<NotFound />} />
           </Routes>
         </Router>
       </ThemeProvider>
