@@ -23,8 +23,8 @@ const userChatsSchema = new mongoose.Schema({
     user2: { type: mongoose.Schema.Types.ObjectId, ref: "User", required: true },
     acceptedAt: {
         type: Date,
-        default: Date.now,  // ✅ Ensure it defaults to a valid JavaScript Date
-        set: (val) => val instanceof Date ? val : new Date(val) // ✅ Force conversion to Date
+        default: Date.now,  //  Ensure it defaults to a valid JavaScript Date
+        set: (val) => val instanceof Date ? val : new Date(val) //  Force conversion to Date
     },
     chats: { type: [messageSchema], default: [] }
 });
