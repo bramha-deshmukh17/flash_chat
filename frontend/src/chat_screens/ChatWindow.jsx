@@ -2,6 +2,13 @@ import { useEffect, useLayoutEffect, useState, useRef } from "react";
 import { io } from "socket.io-client";
 import { FaUpload, FaImage, FaArrowRight, FaPaperPlane, FaArrowDown } from "react-icons/fa";
 import FilePreview from "./FilePreview";
+import {
+    formatMessageDate,
+    handleImageLoad,
+    handleImageError,
+    scrollToBottom,
+    handleFileChange
+} from "./ChatHelper";
 
 // Create the socket instance outside the component
 const socket = io(import.meta.env.VITE_API_URL, {
@@ -11,17 +18,6 @@ const socket = io(import.meta.env.VITE_API_URL, {
     reconnectionAttempts: 50,
     reconnectionDelay: 2000,
 });
-
-const formatMessageDate = (dateString) => {
-    const date = new Date(dateString);
-    return date.toLocaleString("en-US", {
-        month: "short",
-        day: "numeric",
-        hour: "2-digit",
-        minute: "2-digit",
-        hour12: true,
-    });
-};
 
 const ChatWindow = ({ activeChat, activeUserId }) => {
     const URI = import.meta.env.VITE_API_URL;
@@ -46,14 +42,6 @@ const ChatWindow = ({ activeChat, activeUserId }) => {
     };
     const handleImageError = (index) => {
         setImageLoading((prev) => ({ ...prev, [index]: false }));
-    };
-
-    // Scroll to bottom for new incoming messages or initial load
-    const scrollToBottom = () => {
-        const scrollableDiv = scrollableDivRef.current;
-        if (scrollableDiv) {
-            scrollableDiv.scrollTop = scrollableDiv.scrollHeight;
-        }
     };
 
     // After messages update:
@@ -164,19 +152,6 @@ const ChatWindow = ({ activeChat, activeUserId }) => {
         }
     };
 
-    const MAX_FILE_SIZE = 5 * 1024 * 1024;
-    const handleFileChange = (event) => {
-        const selected = event.target.files[0];
-        if (selected) {
-            if (selected.size > MAX_FILE_SIZE) {
-                alert("File size exceeds 5MB. Please upload a smaller file.");
-                return;
-            }
-            const fileUrl = URL.createObjectURL(selected);
-            setSelectedFile(fileUrl);
-            setFile(selected);
-        }
-    };
     const sendFile = () => {
         if (!file) return;
         const reader = new FileReader();
