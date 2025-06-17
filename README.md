@@ -17,17 +17,34 @@ A real-time chat web application built using the **MERN stack** that allows user
 
 ---
 
-## 🌐 Live Demo
+
+## Table of Contents
+
+- [🌐 Live Demo](#live-demo)
+- [📂 GitHub Repository](#github-repository)
+- [🛠️ Tech Stack](#tech-stack)
+- [✨ Features](#features)
+- [🔒 Authentication](#authentication)
+- [📁 File Upload](#file-upload)
+- [🧪 Installation](#installation)
+- [🖥️ Usage](#usage)
+- [⚙️ Deployment](#deployment)
+- [🌐 References](#references)
+- [📬 Contact](#contact)
+
+---
+
+## <a id="live-demo"></a>🌐 Live Demo
 
 👉 [Flash Chat on Render](https://flash-chat-9dt7.onrender.com)
 
-## 📂 GitHub Repository
+## <a id="github-repository"></a>📂 GitHub Repository
 
 🔗 [View Source Code](https://github.com/bramha-deshmukh17/flash_chat)
 
 ---
 
-## 🛠️ Tech Stack
+## <a id="tech-stack"></a>🛠️ Tech Stack
 
 - **Frontend**: React.js, Tailwind CSS, Socket.IO Client  
 - **Backend**: Node.js, Express.js, Socket.IO Server  
@@ -37,7 +54,7 @@ A real-time chat web application built using the **MERN stack** that allows user
 
 ---
 
-## ✨ Features
+## <a id="features"></a>✨ Features
 
 - ⚡ Real-time communication using WebSockets
 - 🔐 Secure authentication with JWT
@@ -48,14 +65,14 @@ A real-time chat web application built using the **MERN stack** that allows user
 
 ---
 
-## 🔒 Authentication
+## <a id="authentication"></a>🔒 Authentication
 
 - Users sign up and log in securely using JWT-based authentication.
 - Tokens are stored securely to persist sessions.
 
 ---
 
-## 📁 File Upload
+## <a id="file-upload"></a>📁 File Upload
 
 - Users can share media and documents directly in the chat.
 - Files are uploaded to **Firebase Storage** and shared as downloadable URLs.
@@ -63,7 +80,7 @@ A real-time chat web application built using the **MERN stack** that allows user
 
 ---
 
-## 🧪 Installation
+## <a id="installation"></a>🧪 Installation
 
 ### 1. **Clone the Repository**
 
@@ -121,14 +138,14 @@ FB_APP_ID=your_fb_app_id
 
 ---
 
-## 🖥️ Usage
+## <a id="usage"></a>🖥️ Usage
 
 - Register a new account or log in.
 - Start chatting, sharing files, and switching between conversations.
 
 ---
 
-## ⚙️ Deployment
+## <a id="deployment"></a>⚙️ Deployment
 
 - The backend serves the production React build from the `/dist` folder.
 - For deployment, build the frontend with `npm run build` and copy the output to the backend's `dist` directory.
@@ -136,7 +153,7 @@ FB_APP_ID=your_fb_app_id
 
 ---
 
-## 🌐 References
+## <a id="references"></a>🌐 References
 
 - [React](https://react.dev/)
 - [Node.js](https://nodejs.org/)
@@ -146,3 +163,7 @@ FB_APP_ID=your_fb_app_id
 - [Firebase](https://firebase.google.com/)
 
 ---
+
+## <a id="contact"></a>📬 Contact
+
+For any inquiries or feedback, please contact me at [your_email@example.com](mailto:your_email@example.com).
