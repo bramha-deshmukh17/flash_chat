@@ -3,13 +3,19 @@ import { FaEdit } from "react-icons/fa";
 import { useTheme } from "../Theme/ThemeContext";
 import { storage } from "../firebase"; // Import Firebase storage
 import { ref, uploadBytes, getDownloadURL } from "firebase/storage";
+import { useNavigate } from "react-router-dom";
 
 // Simple date formatting component: DD/MM/YYYY
 const FormatDate = ({ dateString }) => {
     const formattedDate = new Date(dateString).toLocaleDateString("en-GB");
     return <span>{formattedDate}</span>;
 };
-
+// Simple circular spinner component
+const Spinner = () => (
+    <div className="flex justify-center items-center py-1 px-5">
+        <div className="animate-spin rounded-full h-4 w-4 border-t-2 border-b-2 border-white"></div>
+    </div>
+);
 export const Profile = ({ userData, setUserData }) => {
     const URI = import.meta.env.VITE_API_URL;
 
@@ -23,7 +29,8 @@ export const Profile = ({ userData, setUserData }) => {
     const [error, setError] = useState(null);
     const [selectedImage, setSelectedImage] = useState("default.jpg");
     const [imageFile, setImageFile] = useState(null);
-
+    const [loading, setLoading] = useState(false);
+    
     const validateUserName = (username) => {
 
         if (username.length < 5 || username.length > 16) {
@@ -119,12 +126,13 @@ export const Profile = ({ userData, setUserData }) => {
 
     const saveUserData = async () => {
         try {
+            setLoading(true);
             let imageURL = selectedImage;
             if (imageFile) {
                 const uploadedURL = await handleUpload();
                 if (uploadedURL) imageURL = uploadedURL;
             }
-
+            
             await fetch(`${URI}update/profile`, {
                 method: "POST",
                 credentials: "include",
@@ -154,8 +162,10 @@ export const Profile = ({ userData, setUserData }) => {
                     console.log(err);
                     setError('An error occurred. Please try again later.');
                 });
+                setLoading(false);
 
-        } catch (error) {
+            } catch (error) {
+                setLoading(false);
             console.error("Error updating profile:", error.message);
         }
     };
@@ -200,10 +210,10 @@ export const Profile = ({ userData, setUserData }) => {
                     </button>
                     {isEditing && (
                         <button
-                            className="mb-2 px-4 py-2 bg-green-500 text-white rounded-md hover:bg-green-600"
+                        className="mb-2 px-4 py-2 bg-green-500 text-white rounded-md hover:bg-green-600"
                             onClick={saveUserData}
                         >
-                            Save
+                            {loading ? <Spinner /> : "Save"}
                         </button>
                     )}
                     <h1 className="mt-4">Username:</h1>
@@ -215,7 +225,7 @@ export const Profile = ({ userData, setUserData }) => {
                         onChange={handleChange}
                         disabled={!isEditing}
                         className="border p-2 rounded-md w-full sm:w-1/2"
-                    /><br />
+                        /><br />
                     {validationError.username && <span className="text-red-500">{validationError.username}</span>}
                     <h1 className="mt-4">Email:</h1>
                     <input
@@ -226,7 +236,7 @@ export const Profile = ({ userData, setUserData }) => {
                         onChange={handleChange}
                         disabled={!isEditing}
                         className="border p-2 rounded-md w-full sm:w-1/2"
-                    /><br />
+                        /><br />
                     {validationError.email && <span className="text-red-500">{validationError.email}</span>}<br />
                     {error && <p className="text-red-500"> {error}</p>}<br />
                     <h1 className="mt-4">
@@ -243,6 +253,7 @@ export const Password = () => {
     const [validationError, setValidationError] = useState({});
     const [error, setError] = useState(null);
     const URI = import.meta.env.VITE_API_URL;
+    const [loading, setLoading] = useState(false);
 
     const validatePassword = (e) => {
         let { name, value } = e.target;
@@ -280,10 +291,12 @@ export const Password = () => {
 
 
     const handleSubmit = async (e) => {
+        setLoading(true);
         const URI = import.meta.env.VITE_API_URL;
         e.preventDefault(); // Prevent page refresh
         if (!password.oldPassword || !password.newPassword || !password.cnfPassword) {
             setError("All fields are required");
+            setLoading(false);
             return;
         }
 
@@ -312,19 +325,25 @@ export const Password = () => {
                 console.log(err);
                 setError('An error occurred. Please try again later.');
             });
+        setLoading(false);
     }
     return (
         <div className="p-2 sm:p-5">
             <h1 className="head">Update Password</h1>
             <form onSubmit={handleSubmit}>
-                <input type='password' name="oldPassword" onChange={validatePassword} className="w-full sm:w-1/2 mb-2" placeholder="Enter old password" /><br />
-                {validationError.oldPassword && <span className="text-red-500">{validationError.oldPassword}</span>}<br />
-                <input type='password' name="newPassword" id="newPassword" onChange={validatePassword} className="w-full sm:w-1/2 mb-2" placeholder="Enter New password" /><br />
-                {validationError.newPassword && <span className="text-red-500">{validationError.newPassword}</span>}<br />
-                <input type='password' name="cnfPassword" onChange={validatePassword} className="w-full sm:w-1/2 mb-2" placeholder="Confirm password" /><br />
-                {validationError.cnfPassword && <span className="text-red-500">{validationError.cnfPassword}</span>}<br />
+
+                <input type='password' name="oldPassword" onChange={validatePassword} className="w-full sm:w-1/2 mb-2" placeholder="Enter old password" required /><br />
+                {validationError.oldPassword && <span className="text-red-500">{validationError.oldPassword}</span>}
+
+                <input type='password' name="newPassword" id="newPassword" onChange={validatePassword} className="w-full sm:w-1/2 mb-2" placeholder="Enter New password" required /><br />
+                {validationError.newPassword && <span className="text-red-500">{validationError.newPassword}</span>}
+
+                <input type='password' name="cnfPassword" onChange={validatePassword} className="w-full sm:w-1/2 mb-2" placeholder="Confirm password" required /><br />
+                {validationError.cnfPassword && <span className="text-red-500">{validationError.cnfPassword}</span>}
+
                 {error && <><p className="text-red-500"> {error}</p><br /></>}
-                <button type="submit" className="me-2 mt-5 px-4 py-2 bg-blue-500 text-white rounded-md hover:bg-blue-600 w-full sm:w-auto">Update Password</button>
+                
+                <button type="submit" className="me-2 mt-5 px-4 py-2 bg-blue-500 text-white rounded-md hover:bg-blue-600 w-full sm:w-auto">{loading ? <Spinner /> : "Update Password"}</button>
             </form>
         </div>
     );
@@ -440,6 +459,7 @@ export const PrivacyPolicy = () => {
 
 export const Logout = () => {
     const URI = import.meta.env.VITE_API_URL;
+    const navigate = useNavigate(); 
     const logout = async (e) => {
         e.preventDefault();
         fetch(`${URI}logout`, {

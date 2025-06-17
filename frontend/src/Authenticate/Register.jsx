@@ -1,8 +1,14 @@
 import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import { useTheme } from "../Theme/ThemeContext";
-
 import { FaLightbulb, FaEyeSlash, FaEye } from "react-icons/fa";
+
+// Simple circular spinner component
+const Spinner = () => (
+    <div className="flex justify-center items-center my-1">
+        <div className="animate-spin rounded-full h-4 w-4 border-t-2 border-b-2 border-white"></div>
+    </div>
+);
 
 const Register = () => {
     const { theme, toggleDarkMode } = useTheme();
@@ -16,6 +22,7 @@ const Register = () => {
     const [showPass, setShowPass] = useState(false);
     const [validationError, setValidationError] = useState({});
     const [error, setError] = useState(null);
+    const [loading, setLoading] = useState(false);
 
     const validateUserName = (e) => {
         let username = e.target.value;
@@ -96,6 +103,7 @@ const Register = () => {
     const handleSubmit = (e) => {
         e.preventDefault();
         if (username && email && password && confirmPassword) {
+            setLoading(true);
             fetch(`${URI}user/register`, {
                 method: 'POST',
                 headers: {
@@ -105,6 +113,7 @@ const Register = () => {
             })
                 .then((res) => res.json())
                 .then((data) => {
+                    setLoading(false);
                     if (data.error) {
                         setError(data.error);
                     } else {
@@ -114,6 +123,7 @@ const Register = () => {
                     }
                 })
                 .catch((err) => {
+                    setLoading(false);
                     console.log(err);
                     setError('An error occurred. Please try again later.');
                 });
@@ -193,7 +203,9 @@ const Register = () => {
                 {validationError.confirmPassword && <span className="text-red-500">{validationError.confirmPassword}</span>}
                 <br />
                 {error && <p className="text-red-500"> {error}</p>}<br />
-                <button type='submit' className="bg-yellow-500 p-3 rounded text-white" style={{ width: '20%' }}>Register</button>
+                <button type='submit' className="bg-yellow-500 p-3 rounded text-white" style={{ width: '20%' }} disabled={loading}>
+                    {loading ? <Spinner /> : "Register"}
+                </button>
             </form>
         </div>
     );

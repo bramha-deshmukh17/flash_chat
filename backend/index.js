@@ -100,34 +100,53 @@ io.on("connection", (socket) => {
     });
 
     // Handle sending messages
-    socket.on("send", async ({ chatId, message }) => {
-        const result = await AddMessages({ chatId, message, senderId });
+    socket.on("send", ({ chatId, message }) => {
+        const by = senderId;
+        io.to(chatId).emit("send", {
+            message: { message, by, file_url: null, date: new Date().toISOString() },
+        });
 
-        if (result.success) {
-            let by = senderId;
-            io.to(chatId).emit("send", { message: { message, by, file_url: null, date: new Date().toISOString() } });
-
-        } else {
-            socket.emit("error", { error: result.error });
-
-        }
+        // Save message in background
+        AddMessages({ chatId, message, senderId }).catch((err) => {
+            console.error("DB write failed:", err);
+            socket.emit("error", { error: "Message not saved to DB" });
+        });
     });
+
 
     // Handle image sharing
     socket.on("shareFile", async ({ chatId, message = null, file, mimeType }) => {
         const fileUrl = await UploadDocument(file, chatId, mimeType);
+
         if (fileUrl.success) {
-            const result = await AddMessages({ chatId, message: message, senderId, fileUrl: fileUrl.message });
-            if (result.success) {
-                let by = senderId;
-                io.to(chatId).emit("shareFile", { message: { message, by, file_Url: fileUrl.message, date: new Date().toISOString() } });
-            } else {
-                socket.emit("error", { error: result.error });
-            }
+            const by = senderId;
+            const payload = {
+                message,
+                by,
+                file_Url: fileUrl.message,
+                date: new Date().toISOString(),
+            };
+
+            // Emit immediately for instant feedback
+            io.to(chatId).emit("shareFile", { message: payload });
+
+            // Save to DB in background
+            AddMessages({
+                chatId,
+                message,
+                senderId,
+                fileUrl: fileUrl.message,
+            }).catch((err) => {
+                console.error("Error saving shared file message:", err);
+                socket.emit("error", { error: "Shared file message not saved to DB" });
+            });
+
         } else {
             console.error("Error uploading file:", fileUrl.error);
+            socket.emit("error", { error: "File upload failed" });
         }
     });
+
 
     // Handle disconnect
     socket.on("disconnect", (reason) => {

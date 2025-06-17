@@ -3,6 +3,13 @@ import { FaLightbulb, FaEye, FaEyeSlash } from 'react-icons/fa';
 import { useTheme } from '../Theme/ThemeContext';
 import { useNavigate } from "react-router-dom";
 
+// Simple circular spinner component
+const Spinner = () => (
+    <div className="flex justify-center items-center my-1">
+        <div className="animate-spin rounded-full h-4 w-4 border-t-2 border-b-2 border-white"></div>
+    </div>
+);
+
 const Login = () => {
 
     const URI = import.meta.env.VITE_API_URL;
@@ -13,6 +20,7 @@ const Login = () => {
     const [password, setPassword] = useState(null);
     const [validationError, setValidationError] = useState({});
     const [error, setError] = useState(null);
+    const [loading, setLoading] = useState(false);
 
     //Check for user session
     useEffect(() => {
@@ -81,6 +89,7 @@ const Login = () => {
     const handleSubmit = (e) => {
         e.preventDefault();
         if (username && password) {
+            setLoading(true);
             fetch(`${URI}user/login`, {
                 method: 'POST',
                 credentials: 'include',
@@ -90,8 +99,12 @@ const Login = () => {
                 body: JSON.stringify({ username, password }),
             })
                 .then((res) => res.json())
-                .then((data) => data.error ? setError(data.error) : navigate('/chats'))
+                .then((data) => {
+                    setLoading(false);
+                    data.error ? setError(data.error) : navigate('/chats');
+                })
                 .catch((err) => {
+                    setLoading(false);
                     console.error(err);
                     setError('An error occurred. Please try again later.');
                 });
@@ -147,7 +160,9 @@ const Login = () => {
                 {validationError.password && <span className="text-red-500">{validationError.password}</span>}
                 <br />
                 {error && <p className="text-red-500">{error}</p>}
-                <button type='submit' className="bg-yellow-500 p-3 rounded text-white" style={{ minWidth: '20%' }}>Login</button>
+                <button type='submit' className="bg-yellow-500 p-3 rounded text-white" style={{ minWidth: '20%' }} disabled={loading}>
+                    {loading ? <Spinner /> : "Login"}
+                </button>
             </form>
         </div>
     );
