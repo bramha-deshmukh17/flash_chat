@@ -164,11 +164,6 @@ FB_APP_ID=your_fb_app_id
 
 ---
 
-## <a id="contact"></a>📬 Contact
-<p align="center">
-  <img src="public/me.png" alt="Portfolio Preview" width="250"/>
-</p>
-
 <p align="center">
   <img src="https://img.shields.io/badge/React-20232A?style=for-the-badge&logo=react&logoColor=61DAFB" alt="React" />
   <img src="https://img.shields.io/badge/Vite-646CFF?style=for-the-badge&logo=vite&logoColor=FFD62E" alt="Vite" />
