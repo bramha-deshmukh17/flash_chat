@@ -2,6 +2,7 @@ import { useEffect, useLayoutEffect, useState, useRef } from "react";
 import { io } from "socket.io-client";
 import { FaUpload, FaImage, FaArrowRight, FaPaperPlane, FaArrowDown } from "react-icons/fa";
 import FilePreview from "./FilePreview";
+import { useTheme } from "../Theme/ThemeContext"; 
 
 // Create the socket instance outside the component
 const socket = io(import.meta.env.VITE_API_URL, {
@@ -23,6 +24,22 @@ const formatMessageDate = (dateString) => {
   });
 };
 
+// Simple circular spinner component
+const Spinner = () => {
+  const { theme } = useTheme();
+  const borderColor =
+    theme === "dark"
+      ? "border-white"
+      : "border-gray-800"; // You can adjust this color as needed
+
+  return (
+    <div className="flex justify-center items-center my-1">
+      <div
+        className={`animate-spin rounded-full h-4 w-4 border-t-2 border-b-2 ${borderColor}`}
+      ></div>
+    </div>
+  );
+};
 const ChatWindow = ({ activeChat, activeUserId }) => {
   const URI = import.meta.env.VITE_API_URL;
   const [messages, setMessages] = useState([]);
@@ -41,6 +58,9 @@ const ChatWindow = ({ activeChat, activeUserId }) => {
   const isFetchingRef = useRef(false);
   // New flag to indicate we are prepending older messages
   const isPrependingRef = useRef(false);
+
+  // Add this ref to track if user was at bottom before new messages
+  const wasAtBottomRef = useRef(true);
 
   const handleImageLoad = (index) => {
     setImageLoading((prev) => ({ ...prev, [index]: false }));
@@ -61,7 +81,7 @@ const ChatWindow = ({ activeChat, activeUserId }) => {
   // - If it was a prepend (loading older), skip scrollToBottom here.
   // - If it's new incoming or initial load and not prepending, scroll to bottom.
   useEffect(() => {
-    if (!isPrependingRef.current) {
+    if (wasAtBottomRef.current && !isPrependingRef.current) {
       scrollToBottom();
     }
     // After this effect runs, for prepending we rely on useLayoutEffect to restore position.
@@ -79,6 +99,15 @@ const ChatWindow = ({ activeChat, activeUserId }) => {
       isPrependingRef.current = false;
     }
   }, [messages]);
+
+  // Update wasAtBottomRef before messages change
+  useLayoutEffect(() => {
+    const scrollableDiv = scrollableDivRef.current;
+    if (scrollableDiv) {
+      wasAtBottomRef.current =
+        scrollableDiv.scrollHeight - scrollableDiv.scrollTop <= scrollableDiv.clientHeight + 1;
+    }
+  }, [messages.length]); // runs before DOM updates for new messages
 
   // Fetch older messages with pagination
   const fetchMessages = (sectionToFetch) => {
@@ -218,11 +247,15 @@ const ChatWindow = ({ activeChat, activeUserId }) => {
       <div className="flex-1 flex flex-col relative h-full">
         {/* Messages */}
         <div
-          className="messages-container p-2 sm:p-4 overflow-y-scroll flex-1"
+          className="messages-container sm:p-4 overflow-y-scroll flex-1"
           ref={scrollableDivRef}
           onScroll={handleScroll}
-          style={{ paddingBottom: "5rem", marginBottom: '3rem' }}
+          
         >
+          {/* Spinner for fetching older messages */}
+          {isFetchingRef.current && isPrependingRef.current && (
+            <Spinner />
+          )}
           {messages.length > 0 ? (
             messages.map((msg, index) => (
               <div

@@ -216,10 +216,10 @@ button:focus {
 /* Base styling for message bubble */
 #chat-window .message-bubble {
     max-width: 60%;
-    min-width: 120px;
-    padding: 0.75rem 1rem;
+    min-width: 100px;
+    padding: 0.5rem 0.75rem;
     /* Increase bottom padding to add gap between text and date */
-    padding-bottom: 2rem;
+    padding-bottom: 1.5rem;
     font-size: 1rem;
     color: var(--text-color);
     border-radius: 20px;
@@ -246,7 +246,7 @@ button:focus {
 
 /* Styling for the date inside the bubble */
 #chat-window .date {
-    font-size: 0.75rem;
+    font-size: 0.65rem;
     position: absolute;
     bottom: 10px;
     right: 10px;

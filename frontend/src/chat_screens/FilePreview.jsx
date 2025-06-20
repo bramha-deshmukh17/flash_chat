@@ -42,13 +42,13 @@ const FilePreview = ({ fileUrl, index, imageLoading, handleImageLoad, handleImag
     if (isImage) {
         const filename = decodeURIComponent(fileUrl.split("/").pop().split("?")[0]);
         return (
-            <div className="flex flex-col items-start space-y-2">
+            <div className="flex flex-col items-start">
                 <div className="relative">
                     {/* Download button overlaid at top-right */}
-                    {imageLoading[index] === false && (
+                    {imageLoading[index] === false ? (
                         <a
                             href={fileUrl}
-                            className="absolute top-2 right-2 text-blue-500 hover:underline text-sm bg-white bg-opacity-75 rounded p-1"
+                            className="absolute top-2 right-2 text-blue-500 hover:underline text-sm bg-white bg-opacity-75 rounded"
                             download={filename}
                             target="_blank"
                             rel="noopener noreferrer"
@@ -56,8 +56,7 @@ const FilePreview = ({ fileUrl, index, imageLoading, handleImageLoad, handleImag
                         >
                             <FaDownload />
                         </a>
-                    )}
-                    {imageLoading[index] !== false && (
+                    ) :(
                         <p className="inset-0 flex p-5 items-center justify-center text-white text-sm rounded-lg">
                             Loading...
                         </p>
@@ -78,7 +77,7 @@ const FilePreview = ({ fileUrl, index, imageLoading, handleImageLoad, handleImag
         const parts = decodeURIComponent(file).split("/");
         const filename = parts[parts.length - 1];
         return (
-            <div className="pb-2 pt-2 rounded shadow flex items-center space-x-2">
+            <div className="pb-2 pt-2 rounded flex items-center space-x-2">
                 <span className="text-sm font-bold">{filename}</span>
                 <a
                     href={fileUrl}
