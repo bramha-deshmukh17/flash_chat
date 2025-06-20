@@ -1,5 +1,5 @@
 <p align="center">
-  <img src="https://firebasestorage.googleapis.com/v0/b/flash-chat-e08f7.firebasestorage.app/o/logo.png?alt=media&token=083e8077-4533-4ed7-99fa-b500efd06572" alt="Flash Chat Logo" />
+  <img src="./frontend/public/logo.png" alt="Flash Chat Logo" />
 </p>
 <p align="center">
   <img src="https://img.shields.io/badge/React-20232A?style=for-the-badge&logo=react&logoColor=61DAFB" alt="React" />
@@ -11,6 +11,7 @@
   <img src="https://img.shields.io/badge/MongoDB-47A248?style=for-the-badge&logo=mongodb&logoColor=white" alt="MongoDB" />
   <img src="https://img.shields.io/badge/Firebase-FFCA28?style=for-the-badge&logo=firebase&logoColor=black" alt="Firebase" />
 </p>
+
 # ⚡ Flash Chat
 
 A real-time chat web application built using the **MERN stack** that allows users to communicate instantly, share media/documents, and authenticate securely.
@@ -97,6 +98,17 @@ cd frontend
 npm install
 npm run dev
 ```
+
+> ⚠️ **Warning:**  
+> <span style="color:red; font-weight:bold;">Every time you run the server, you must update the API URL in both the frontend and backend `.env` files with your current IP address.</span>  
+>  
+> 💡 **Frontend:**  
+> Set `VITE_API_URL` in `frontend/.env` to your backend server URL (e.g., `http://your.ip.address:backend_port/`).  
+>  
+> 💡 **Backend:**  
+> Set `FRONTEND_URL` in `backend/.env` to your frontend server URL (e.g., `http://your.ip.address:3000`).  
+>  
+> This is necessary because your local IP address may change between sessions. Failing to update these variables can cause connection issues between the frontend and backend.
 
 - Create a `.env` file in the `frontend` folder with the following (example values):
 
