@@ -166,12 +166,6 @@ FB_APP_ID=your_fb_app_id
 
 ---
 
-## <a id="author"></a>🧑‍💻 Author
-
-- **Bramha Deshmukh**
-- [GitHub](https://github.com/bramha-deshmukh17)
-
----
 
 ## <a id="references"></a>🌐 References
 
@@ -182,6 +176,13 @@ FB_APP_ID=your_fb_app_id
 - [Express](https://expressjs.com/)
 - [MongoDB Atlas](https://www.mongodb.com/cloud/atlas)
 - [Firebase](https://firebase.google.com/)
+
+---
+
+## <a id="author"></a>🧑‍💻 Author
+
+- **Bramha Deshmukh**
+- [GitHub](https://github.com/bramha-deshmukh17)
 
 ---
 
