@@ -22,6 +22,7 @@ A real-time chat web application built using the **MERN stack** that allows user
 ## Table of Contents
 
 - [🌐 Live Demo](#live-demo)
+- [📂 GitHub Repository](#github-repository)
 - [🛠️ Tech Stack](#tech-stack)
 - [✨ Features](#features)
 - [🔒 Authentication](#authentication)
@@ -39,6 +40,9 @@ A real-time chat web application built using the **MERN stack** that allows user
 
 👉 [Flash Chat on Render](https://flash-chat-9dt7.onrender.com)
 
+## <a id="github-repository"></a>📂 GitHub Repository
+
+🔗 [View Source Code](https://github.com/bramha-deshmukh17/flash_chat)
 
 ---
 
