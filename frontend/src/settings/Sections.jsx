@@ -118,7 +118,6 @@ export const Profile = ({ userData, setUserData }) => {
             setSelectedImage(downloadURL);
             return downloadURL;
         } catch (error) {
-            console.error("Upload failed:", error);
             alert("Failed to upload image.");
             return null;
         }
@@ -158,16 +157,15 @@ export const Profile = ({ userData, setUserData }) => {
                         window.location.reload();
                     }
                 })
-                .catch((err) => {
-                    console.log(err);
+                .catch(() => {
                     setError('An error occurred. Please try again later.');
                 });
                 setLoading(false);
-
+                
             } catch (error) {
                 setLoading(false);
-            console.error("Error updating profile:", error.message);
-        }
+                setError('An error occurred. Please try again later.');
+            }
     };
 
     return (
@@ -257,7 +255,6 @@ export const Password = () => {
 
     const validatePassword = (e) => {
         let { name, value } = e.target;
-        console.error(name,":",value);
         if(name!='cnfPassword'){
             if (value.length < 6 || value.length > 16) {
                 e.target.style.borderColor = "red";
@@ -322,7 +319,6 @@ export const Password = () => {
                 }
             })
             .catch((err) => {
-                console.log(err);
                 setError('An error occurred. Please try again later.');
             });
         setLoading(false);
@@ -468,9 +464,9 @@ export const Logout = () => {
         })
             .then((res) => res.json())
             .then((data) =>
-                data.error ? console.error(data.error) : navigate("/login")
+                data.error ? alert("Error") : navigate("/login")
             )
-            .catch((error) => console.error("Logout error:", error.message));
+            .catch((error) => console.error("Logout error"));
     };
 
     return (

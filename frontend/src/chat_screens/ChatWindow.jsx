@@ -3,16 +3,8 @@ import { io } from "socket.io-client";
 import { FaUpload, FaImage, FaArrowRight, FaPaperPlane, FaArrowDown } from "react-icons/fa";
 import FilePreview from "./FilePreview";
 import { useTheme } from "../Theme/ThemeContext";
-import { decryptMessage, encryptMessage } from "../secure/Secure"; // <-- add this import
-
-// Create the socket instance outside the component
-const socket = io(import.meta.env.VITE_API_URL, {
-  withCredentials: true,
-  transports: ["websocket", "polling"],
-  reconnection: true,
-  reconnectionAttempts: 50,
-  reconnectionDelay: 2000,
-});
+import { decryptMessage, encryptMessage } from "../secure/Secure";
+import { useNavigate } from "react-router-dom";
 
 const formatMessageDate = (dateString) => {
   const date = new Date(dateString);
@@ -41,7 +33,9 @@ const Spinner = () => {
     </div>
   );
 };
+
 const ChatWindow = ({ activeChat, activeUserId }) => {
+  const navigate = useNavigate();
   const URI = import.meta.env.VITE_API_URL;
   const [messages, setMessages] = useState([]);
   const [selectedFile, setSelectedFile] = useState(null);
@@ -63,6 +57,9 @@ const ChatWindow = ({ activeChat, activeUserId }) => {
   // Add this ref to track if user was at bottom before new messages
   const wasAtBottomRef = useRef(true);
 
+  // Socket ref (single socket per component/tab)
+  const socketRef = useRef(null);
+
   const handleImageLoad = (index) => {
     setImageLoading((prev) => ({ ...prev, [index]: false }));
   };
@@ -71,6 +68,46 @@ const ChatWindow = ({ activeChat, activeUserId }) => {
   };
 
   const [userData, setUserData] = useState({});
+
+  // Clean up socket on unmount
+  useEffect(() => {
+    return () => {
+      socketRef.current?.disconnect();
+      socketRef.current = null;
+    };
+  }, []);
+
+  // socket connection & join
+  useEffect(() => {
+    if (!activeChat) return;
+
+    if (!socketRef.current) {
+      socketRef.current = io(import.meta.env.VITE_API_URL, {
+        withCredentials: true,
+        transports: ["websocket", "polling"],
+        reconnection: true,
+        reconnectionAttempts: 50,
+        reconnectionDelay: 2000,
+      });
+    }
+
+    const socket = socketRef.current;
+
+    const onConnect = () => {
+      if (activeChat) socket.emit("joinChat", activeChat);
+    };
+
+    socket.on("connect", onConnect);
+
+    // Also emit joinChat immediately if already connected
+    if (socket.connected && activeChat) {
+      socket.emit("joinChat", activeChat);
+    }
+
+    return () => {
+      socket.off("connect", onConnect);
+    };
+  }, [activeChat]);
 
   // Fetch user data
   useEffect(() => {
@@ -130,7 +167,7 @@ const ChatWindow = ({ activeChat, activeUserId }) => {
       .then((res) => res.json())
       .then(async (data) => {
         if (Array.isArray(data)) {
-          
+
           // Decrypt each message.message, but fall back to original on error
           const decryptedData = await Promise.all(
             data.map(async (msg) => {
@@ -140,7 +177,7 @@ const ChatWindow = ({ activeChat, activeUserId }) => {
                 const decryptedText = await decryptMessage(msg.message, chatPassword);
                 return { ...msg, message: decryptedText };
               } catch (e) {
-                console.warn("Failed to decrypt history message, using raw:", e);
+                console.error("Failed to decrypt history message:", e);
                 return msg;
               }
             })
@@ -181,37 +218,60 @@ const ChatWindow = ({ activeChat, activeUserId }) => {
     }, 0);
   }, [activeChat, URI]);
 
-  // Register WebSocket connection
-  useEffect(() => {
-    const onConnect = () => console.log("Connected to WebSocket server!", socket.id);
-    socket.on("connect", onConnect);
-    return () => socket.off("connect", onConnect);
-  }, []);
-
-  // Join chat room when activeChat changes
-  useEffect(() => {
-    if (!activeChat) return;
-    socket.emit("joinChat", activeChat);
-  }, [activeChat]);
-
   // Listen for incoming messages (append to bottom)
   useEffect(() => {
+    const socket = socketRef.current;
+    if (!socket) return;
+
     const handleMessage = async (data) => {
-      const chatPassword = `${activeChat}:${data.message.by}`;
       try {
-        const decryptedText = await decryptMessage(data.message.message, chatPassword);
-        setMessages((prevMessages) => [
-          ...prevMessages,
-          { ...data.message, message: decryptedText },
-        ]);
-      } catch (e) {
-        console.warn("Failed to decrypt live message, using raw:", e);
-        setMessages((prevMessages) => [...prevMessages, data.message]);
+        let finalMessageObject = null;
+
+        // Case A: server sends { message: "<encrypted-string>", by, date, file_Url }
+        if (data && typeof data.message === "string") {
+          if (data.by) {
+            const chatPassword = `${activeChat}:${data.by}`;
+            const decryptedText = await decryptMessage(data.message, chatPassword);
+            finalMessageObject = { ...data, message: decryptedText };
+          } else {
+            // no 'by' available — keep raw string
+            finalMessageObject = { ...data, message: data.message };
+          }
+        }
+        // Case B: server sends { message: { message: "<enc>", by, date, file_Url } }
+        else if (data && typeof data.message === "object") {
+          const nested = data.message;
+          if (nested && typeof nested.message === "string" && nested.by) {
+            const chatPassword = `${activeChat}:${nested.by}`;
+            const decryptedText = await decryptMessage(nested.message, chatPassword);
+            finalMessageObject = { ...nested, message: decryptedText };
+          } else {
+            finalMessageObject = nested;
+          }
+        }
+        // Case C: server already sent a flat message object
+        else if (data && typeof data.message === "undefined" && typeof data.message !== "string") {
+          finalMessageObject = data;
+        } else {
+          finalMessageObject = data;
+        }
+
+        setMessages((prev) => [...prev, finalMessageObject]);
+      } catch (err) {
+        console.error("Socket message handling failed:", err);
+        // Fallback: try to push sensible shape
+        if (data && data.message && typeof data.message === "object") {
+          setMessages((prev) => [...prev, data.message]);
+        } else {
+          setMessages((prev) => [...prev, data]);
+        }
       }
     };
+
     socket.on("send", handleMessage);
     socket.on("shareFile", handleMessage);
     scrollToBottom();
+
     return () => {
       socket.off("send", handleMessage);
       socket.off("shareFile", handleMessage);
@@ -220,25 +280,18 @@ const ChatWindow = ({ activeChat, activeUserId }) => {
 
   // Send a text message
   const sendMessage = async () => {
-    console.log("sendMessage called with:", {
-      inputMessage,
-      activeChat,
-      activeUserId,
-    });
 
     if (!inputMessage.trim() || !activeChat || !activeUserId) {
-      console.warn("Blocked send: missing inputMessage/activeChat/activeUserId");
       return;
     }
 
-    const chatPassword = `${activeChat}:${userData._id}`;
-
     try {
+      const chatPassword = `${activeChat}:${userData._id}`;
       const encryptedMessage = await encryptMessage(inputMessage, chatPassword);
-      socket.emit("send", { chatId: activeChat, message: encryptedMessage });
+      socketRef.current?.emit("send", { chatId: activeChat, message: encryptedMessage });
       setInputMessage("");
     } catch (err) {
-      console.error("Failed to encrypt message:", err);
+      console.error("Failed to encrypt message", err);
     }
   };
 
@@ -258,12 +311,12 @@ const ChatWindow = ({ activeChat, activeUserId }) => {
   const sendFile = async () => {
     if (!file) return;
     const reader = new FileReader();
-    const chatPassword = `${activeChat}:${userData._id}`;
 
     try {
+      const chatPassword = `${activeChat}:${userData._id}`;
       const encryptedMessage = await encryptMessage(inputMessage, chatPassword);
       reader.onloadend = () => {
-        socket.emit("shareFile", {
+        socketRef.current?.emit("shareFile", {
           chatId: activeChat,
           message: encryptedMessage,
           file: file,
@@ -273,11 +326,10 @@ const ChatWindow = ({ activeChat, activeUserId }) => {
         setFile(null);
         setInputMessage("");
       };
+      reader.readAsDataURL(file);
     } catch (err) {
-      console.error("Failed to encrypt message:", err);
-    };
-    
-    reader.readAsDataURL(file);
+      console.error("Failed to encrypt/send file", err);
+    }
   };
 
   // Show/hide scroll-to-bottom button & trigger loading older on scroll top
@@ -327,7 +379,7 @@ const ChatWindow = ({ activeChat, activeUserId }) => {
                     handleImageError={handleImageError}
                   />
                 ) : null}
-                <p>{msg.message}</p>
+                <p>{typeof msg.message === 'string' ? msg.message : msg.message?.message || '[Unsupported message]'}</p>
                 <p className="date">{formatMessageDate(msg.date)}</p>
               </div>
             ))
