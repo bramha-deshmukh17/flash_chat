@@ -6,7 +6,6 @@ const ChatList = ({ setActiveChat, chatList, activeChat, setChatList }) => {
     const [searchChatList, setSearchChatList] = useState([]);
 
     const URI = import.meta.env.VITE_API_URL;
-    console.error('chatlist:', chatList);
 
     const handleSearch = (e) => {
 

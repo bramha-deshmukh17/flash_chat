@@ -2,7 +2,8 @@ import { useEffect, useLayoutEffect, useState, useRef } from "react";
 import { io } from "socket.io-client";
 import { FaUpload, FaImage, FaArrowRight, FaPaperPlane, FaArrowDown } from "react-icons/fa";
 import FilePreview from "./FilePreview";
-import { useTheme } from "../Theme/ThemeContext"; 
+import { useTheme } from "../Theme/ThemeContext";
+import { decryptMessage, encryptMessage } from "../secure/Secure"; // <-- add this import
 
 // Create the socket instance outside the component
 const socket = io(import.meta.env.VITE_API_URL, {
@@ -30,7 +31,7 @@ const Spinner = () => {
   const borderColor =
     theme === "dark"
       ? "border-white"
-      : "border-gray-800"; // You can adjust this color as needed
+      : "border-gray-800";
 
   return (
     <div className="flex justify-center items-center my-1">
@@ -69,6 +70,19 @@ const ChatWindow = ({ activeChat, activeUserId }) => {
     setImageLoading((prev) => ({ ...prev, [index]: false }));
   };
 
+  const [userData, setUserData] = useState({});
+
+  // Fetch user data
+  useEffect(() => {
+    fetch(`${URI}settings`, {
+      method: "GET",
+      credentials: "include",
+    })
+      .then((res) => res.json())
+      .then((data) => { data.error ? navigate("/login") : setUserData(data.userDetails); })
+      .catch((error) => console.error("Validation error:", error.message));
+  }, []);
+
   // Scroll to bottom for new incoming messages
   const scrollToBottom = () => {
     const scrollableDiv = scrollableDivRef.current;
@@ -100,15 +114,6 @@ const ChatWindow = ({ activeChat, activeUserId }) => {
     }
   }, [messages]);
 
-  // Update wasAtBottomRef before messages change
-  useLayoutEffect(() => {
-    const scrollableDiv = scrollableDivRef.current;
-    if (scrollableDiv) {
-      wasAtBottomRef.current =
-        scrollableDiv.scrollHeight - scrollableDiv.scrollTop <= scrollableDiv.clientHeight + 1;
-    }
-  }, [messages.length]); // runs before DOM updates for new messages
-
   // Fetch older messages with pagination
   const fetchMessages = (sectionToFetch) => {
     const scrollableDiv = scrollableDivRef.current;
@@ -123,14 +128,29 @@ const ChatWindow = ({ activeChat, activeUserId }) => {
       credentials: "include",
     })
       .then((res) => res.json())
-      .then((data) => {
+      .then(async (data) => {
         if (Array.isArray(data)) {
-          if (data.length > 0) {
-            setMessages((prev) => [...data, ...prev]);
+          
+          // Decrypt each message.message, but fall back to original on error
+          const decryptedData = await Promise.all(
+            data.map(async (msg) => {
+              const chatPassword = `${activeChat}:${msg.by}`;
+              if (typeof msg.message !== "string") return msg;
+              try {
+                const decryptedText = await decryptMessage(msg.message, chatPassword);
+                return { ...msg, message: decryptedText };
+              } catch (e) {
+                console.warn("Failed to decrypt history message, using raw:", e);
+                return msg;
+              }
+            })
+          );
+
+          if (decryptedData.length > 0) {
+            setMessages((prev) => [...decryptedData, ...prev]);
             setSection(sectionToFetch + 1);
-            setHasMoreMessages(data.length === 10);
+            setHasMoreMessages(decryptedData.length === 10);
           } else {
-            // no more older messages
             setHasMoreMessages(false);
             isFetchingRef.current = false;
             isPrependingRef.current = false;
@@ -151,6 +171,7 @@ const ChatWindow = ({ activeChat, activeUserId }) => {
   // On activeChat change: reset and load first page
   useEffect(() => {
     if (!activeChat) return;
+    wasAtBottomRef.current = true;
     setMessages([]);
     setSection(1);
     setHasMoreMessages(true);
@@ -175,22 +196,49 @@ const ChatWindow = ({ activeChat, activeUserId }) => {
 
   // Listen for incoming messages (append to bottom)
   useEffect(() => {
-    const handleMessage = (data) => {
-      setMessages((prevMessages) => [...prevMessages, data.message]);
+    const handleMessage = async (data) => {
+      const chatPassword = `${activeChat}:${data.message.by}`;
+      try {
+        const decryptedText = await decryptMessage(data.message.message, chatPassword);
+        setMessages((prevMessages) => [
+          ...prevMessages,
+          { ...data.message, message: decryptedText },
+        ]);
+      } catch (e) {
+        console.warn("Failed to decrypt live message, using raw:", e);
+        setMessages((prevMessages) => [...prevMessages, data.message]);
+      }
     };
     socket.on("send", handleMessage);
     socket.on("shareFile", handleMessage);
+    scrollToBottom();
     return () => {
       socket.off("send", handleMessage);
       socket.off("shareFile", handleMessage);
     };
-  }, []);
+  }, [activeChat, activeUserId]);
 
   // Send a text message
-  const sendMessage = () => {
-    if (inputMessage.trim()) {
-      socket.emit("send", { chatId: activeChat, message: inputMessage });
+  const sendMessage = async () => {
+    console.log("sendMessage called with:", {
+      inputMessage,
+      activeChat,
+      activeUserId,
+    });
+
+    if (!inputMessage.trim() || !activeChat || !activeUserId) {
+      console.warn("Blocked send: missing inputMessage/activeChat/activeUserId");
+      return;
+    }
+
+    const chatPassword = `${activeChat}:${userData._id}`;
+
+    try {
+      const encryptedMessage = await encryptMessage(inputMessage, chatPassword);
+      socket.emit("send", { chatId: activeChat, message: encryptedMessage });
       setInputMessage("");
+    } catch (err) {
+      console.error("Failed to encrypt message:", err);
     }
   };
 
@@ -207,20 +255,28 @@ const ChatWindow = ({ activeChat, activeUserId }) => {
       setFile(selected);
     }
   };
-  const sendFile = () => {
+  const sendFile = async () => {
     if (!file) return;
     const reader = new FileReader();
-    reader.onloadend = () => {
-      socket.emit("shareFile", {
-        chatId: activeChat,
-        message: inputMessage,
-        file: file,
-        mimeType: file.type,
-      });
-      setSelectedFile(null);
-      setFile(null);
-      setInputMessage("");
+    const chatPassword = `${activeChat}:${userData._id}`;
+
+    try {
+      const encryptedMessage = await encryptMessage(inputMessage, chatPassword);
+      reader.onloadend = () => {
+        socket.emit("shareFile", {
+          chatId: activeChat,
+          message: encryptedMessage,
+          file: file,
+          mimeType: file.type,
+        });
+        setSelectedFile(null);
+        setFile(null);
+        setInputMessage("");
+      };
+    } catch (err) {
+      console.error("Failed to encrypt message:", err);
     };
+    
     reader.readAsDataURL(file);
   };
 
@@ -243,14 +299,14 @@ const ChatWindow = ({ activeChat, activeUserId }) => {
   };
 
   return (
-    <div className="flex h-full w-full overflow-hidden" id="chat-window">
+    <div className="flex w-full overflow-hidden" id="chat-window">
       <div className="flex-1 flex flex-col relative h-full">
         {/* Messages */}
         <div
-          className="messages-container sm:p-4 overflow-y-scroll flex-1"
+          className="messages-container p-4 mb-5 overflow-y-scroll flex-1"
           ref={scrollableDivRef}
           onScroll={handleScroll}
-          
+
         >
           {/* Spinner for fetching older messages */}
           {isFetchingRef.current && isPrependingRef.current && (
@@ -350,9 +406,8 @@ const ChatWindow = ({ activeChat, activeUserId }) => {
 
         {/* Input Section */}
         <div
-          className={`p-2 border-t flex items-center gap-2 absolute bottom-0 left-0 w-full z-50 overflow-x-auto ${
-            activeChat ? "" : "hidden"
-          }`}
+          className={`p-2 border-t flex items-center gap-2 bottom-0 left-0 w-full z-50 overflow-x-auto ${activeChat ? "" : "hidden"
+            }`}
           style={{ minHeight: "4.5rem", marginBottom: "3rem", backgroundColor: "var(--bg-color)" }}
         >
           {/* Image Upload */}
