@@ -15,7 +15,9 @@ function App() {
         <Router>
           <Routes>
             <Route path="/" element={<Welcome />} />
-            <Route path="/register" element={<Register />} />
+            {/* Register route only in development mode */
+            import.meta.env.VITE_NODE_ENV === "development" && <Route path="/register" element={<Register />} />
+            }
             <Route path="/login" element={<Login />} />
             <Route path="/chats" element={<Chats />} />
             <Route path="/settings" element={<Setting />} />

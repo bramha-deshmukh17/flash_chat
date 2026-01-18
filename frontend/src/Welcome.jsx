@@ -29,7 +29,11 @@ const Welcome = () => {
             </ul><br />
 
             <div className='flex justify-center items-center'>
-                <button className='p-3 pr-5 pl-5 text-lg rounded mr-5' style={{ backgroundColor: 'var(--btn-color)' }} onClick={() => { navigate("/register"); }}>Register</button>
+                {
+                    (NODE_ENV === "development") ?
+                    <button className='p-3 pr-5 pl-5 text-lg rounded mr-5' style={{ backgroundColor: 'var(--btn-color)' }} onClick={() => { navigate("/register"); }}>Register</button>
+                    : null
+                }
 
                 <button className='p-3 pr-5 pl-5 text-lg rounded mr-5' style={{ backgroundColor: 'var(--btn-two-color)' }} onClick={() => { navigate("/login"); }}>  &nbsp;Login&nbsp;</button>
             </div>
