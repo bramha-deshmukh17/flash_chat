@@ -127,6 +127,7 @@ const Login = () => {
                 <input
                     type="text"
                     id="username"
+                    name="username"
                     placeholder="Username*"
                     className="bg-gray-600 p-3 rounded text-white"
                     style={{ minWidth: '25%' }}
@@ -139,6 +140,7 @@ const Login = () => {
                     <input
                         type={showPass ? "text" : "password"} // Toggle input type
                         id="password"
+                        name="password"
                         placeholder="Password*"
                         className="bg-gray-600 p-3 rounded text-white w-full"
                         onChange={validatePassword}
@@ -160,9 +162,10 @@ const Login = () => {
                 {validationError.password && <span className="text-red-500">{validationError.password}</span>}
                 <br />
                 {error && <p className="text-red-500">{error}</p>}
-                <button type='submit' className="bg-yellow-500 p-3 rounded text-white" style={{ minWidth: '20%' }} disabled={loading}>
+                <button type='submit' id="login-btn" className="bg-yellow-500 p-3 rounded text-white" style={{ minWidth: '20%' }} disabled={loading}>
                     {loading ? <Spinner /> : "Login"}
                 </button>
+                <p>Don't have an account? <a href="/register" className="text-[var(--btn-color)] mt-2">Register here</a></p>
             </form>
         </div>
     );

@@ -30,7 +30,7 @@ export const Profile = ({ userData, setUserData }) => {
     const [selectedImage, setSelectedImage] = useState("default.jpg");
     const [imageFile, setImageFile] = useState(null);
     const [loading, setLoading] = useState(false);
-    
+
     const validateUserName = (username) => {
 
         if (username.length < 5 || username.length > 16) {
@@ -131,7 +131,7 @@ export const Profile = ({ userData, setUserData }) => {
                 const uploadedURL = await handleUpload();
                 if (uploadedURL) imageURL = uploadedURL;
             }
-            
+
             await fetch(`${URI}update/profile`, {
                 method: "POST",
                 credentials: "include",
@@ -160,12 +160,12 @@ export const Profile = ({ userData, setUserData }) => {
                 .catch(() => {
                     setError('An error occurred. Please try again later.');
                 });
-                setLoading(false);
-                
-            } catch (error) {
-                setLoading(false);
-                setError('An error occurred. Please try again later.');
-            }
+            setLoading(false);
+
+        } catch (error) {
+            setLoading(false);
+            setError('An error occurred. Please try again later.');
+        }
     };
 
     return (
@@ -198,9 +198,10 @@ export const Profile = ({ userData, setUserData }) => {
                 {/* Right Column: Profile Details */}
                 <div className="sm:col-span-8">
                     <button
+                        id="edit-profile"
                         className={`me-2 mb-2 sm:me-5 px-4 py-2 ${isEditing
-                                ? "bg-red-600 hover:bg-red-800"
-                                : "bg-blue-600 hover:bg-blue-800"
+                            ? "bg-red-600 hover:bg-red-800"
+                            : "bg-blue-600 hover:bg-blue-800"
                             } text-white rounded-md`}
                         onClick={handleEditToggle}
                     >
@@ -208,7 +209,7 @@ export const Profile = ({ userData, setUserData }) => {
                     </button>
                     {isEditing && (
                         <button
-                        className="mb-2 px-4 py-2 bg-green-500 text-white rounded-md hover:bg-green-600"
+                            className="mb-2 px-4 py-2 bg-green-500 text-white rounded-md hover:bg-green-600"
                             onClick={saveUserData}
                         >
                             {loading ? <Spinner /> : "Save"}
@@ -223,7 +224,7 @@ export const Profile = ({ userData, setUserData }) => {
                         onChange={handleChange}
                         disabled={!isEditing}
                         className="border p-2 rounded-md w-full sm:w-1/2"
-                        /><br />
+                    /><br />
                     {validationError.username && <span className="text-red-500">{validationError.username}</span>}
                     <h1 className="mt-4">Email:</h1>
                     <input
@@ -234,7 +235,7 @@ export const Profile = ({ userData, setUserData }) => {
                         onChange={handleChange}
                         disabled={!isEditing}
                         className="border p-2 rounded-md w-full sm:w-1/2"
-                        /><br />
+                    /><br />
                     {validationError.email && <span className="text-red-500">{validationError.email}</span>}<br />
                     {error && <p className="text-red-500"> {error}</p>}<br />
                     <h1 className="mt-4">
@@ -255,7 +256,7 @@ export const Password = () => {
 
     const validatePassword = (e) => {
         let { name, value } = e.target;
-        if(name!='cnfPassword'){
+        if (name != 'cnfPassword') {
             if (value.length < 6 || value.length > 16) {
                 e.target.style.borderColor = "red";
                 setValidationError((prev) => ({
@@ -269,17 +270,17 @@ export const Password = () => {
                     [name]: "Password can only contain letters, numbers, and special characters.",
                 }));
             } else {
-                setPassword((prev)=>({...prev, [name]:value}))
+                setPassword((prev) => ({ ...prev, [name]: value }))
                 e.target.style.borderColor = "var(--btn-color)";
                 setValidationError((prev) => ({ ...prev, [name]: null })); // Remove error
             }
-        }else{
+        } else {
             let newPassword = document.getElementById('newPassword').value;
-            if(value===newPassword){
+            if (value === newPassword) {
                 setPassword((prev) => ({ ...prev, [name]: value }))
-                setValidationError((prev)=>({...prev, cnfPassword:null}));
+                setValidationError((prev) => ({ ...prev, cnfPassword: null }));
                 e.target.style.borderColor = "var(--btn-color)";
-            }else{
+            } else {
                 e.target.style.borderColor = "red";
                 setValidationError((prev) => ({ ...prev, cnfPassword: "Password don't match." }));
             }
@@ -338,8 +339,8 @@ export const Password = () => {
                 {validationError.cnfPassword && <span className="text-red-500">{validationError.cnfPassword}</span>}
 
                 {error && <><p className="text-red-500"> {error}</p><br /></>}
-                
-                <button type="submit" className="me-2 mt-5 px-4 py-2 bg-blue-500 text-white rounded-md hover:bg-blue-600 w-full sm:w-auto">{loading ? <Spinner /> : "Update Password"}</button>
+
+                <button type="submit" id="update-password-btn" className="me-2 mt-5 px-4 py-2 bg-blue-500 text-white rounded-md hover:bg-blue-600 w-full sm:w-auto">{loading ? <Spinner /> : "Update Password"}</button>
             </form>
         </div>
     );
@@ -349,9 +350,10 @@ export const Theme = () => {
     const { theme, toggleDarkMode } = useTheme();
     return (
         <div className="p-2 sm:p-5">
-            <h1 className="head">Theme</h1><br/>
-            <p>Switch between light and dark themes.</p><br/>
+            <h1 className="head">Theme</h1><br />
+            <p>Switch between light and dark themes.</p><br />
             <button
+                id="theme-btn"
                 onClick={toggleDarkMode}
                 className="bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded w-full sm:w-auto"
             >
@@ -370,7 +372,7 @@ export const PrivacyPolicy = () => {
                     Thank you for using our chatting application. Your privacy is important to us. This Privacy Policy explains how we collect, use, and protect your information when you use our services.
                 </p>
                 <hr />
-                <h3 className="font-bold" style={{color:'var(--secondary-text)'}}>1. Information We Collect</h3>
+                <h3 className="font-bold" style={{ color: 'var(--secondary-text)' }}>1. Information We Collect</h3>
                 <h3 className="font-semibold">a. Personal Information</h3>
                 <ul className="list-disc ml-6">
                     <li>Name, email address, and profile information</li>
@@ -383,7 +385,7 @@ export const PrivacyPolicy = () => {
                     <li>Activity logs (login/logout, errors)</li>
                 </ul>
                 <hr />
-                <h3 className="font-bold" style={{color:'var(--secondary-text)'}}>2. How We Use Your Information</h3>
+                <h3 className="font-bold" style={{ color: 'var(--secondary-text)' }}>2. How We Use Your Information</h3>
                 <p>
                     We use the collected data to:
                 </p>
@@ -394,12 +396,12 @@ export const PrivacyPolicy = () => {
                     <li>Protect against fraud and abuse</li>
                 </ul>
                 <hr />
-                <h3 className="font-bold" style={{color:'var(--secondary-text)'}}>3. File and Media Handling</h3>
+                <h3 className="font-bold" style={{ color: 'var(--secondary-text)' }}>3. File and Media Handling</h3>
                 <p>
                     Files (including images and documents) shared through the chat are stored securely using <strong>Firebase Storage</strong>. We do not scan or analyze your private files or chats unless required for security or legal compliance.
                 </p>
                 <hr />
-                <h3 className="font-bold" style={{color:'var(--secondary-text)'}}>4. Data Sharing</h3>
+                <h3 className="font-bold" style={{ color: 'var(--secondary-text)' }}>4. Data Sharing</h3>
                 <p>
                     We do <strong>not sell</strong> or share your personal data with third parties for marketing purposes. However, we may share limited information:
                 </p>
@@ -408,7 +410,7 @@ export const PrivacyPolicy = () => {
                     <li>To comply with legal obligations or protect our rights</li>
                 </ul>
                 <hr />
-                <h3 className="font-bold" style={{color:'var(--secondary-text)'}}>5. Cookies and Tracking</h3>
+                <h3 className="font-bold" style={{ color: 'var(--secondary-text)' }}>5. Cookies and Tracking</h3>
                 <p>
                     We may use cookies or local storage to:
                 </p>
@@ -421,12 +423,12 @@ export const PrivacyPolicy = () => {
                     You can manage cookies in your browser settings.
                 </p>
                 <hr />
-                <h3 className="font-bold" style={{color:'var(--secondary-text)'}}>6. Security</h3>
+                <h3 className="font-bold" style={{ color: 'var(--secondary-text)' }}>6. Security</h3>
                 <p>
                     We use encryption, secure connections (HTTPS), and authenticated access to protect your data. However, no method is 100% secure — use caution when sharing sensitive content.
                 </p>
                 <hr />
-                <h3 className="font-bold" style={{color:'var(--secondary-text)'}}>7. Your Rights</h3>
+                <h3 className="font-bold" style={{ color: 'var(--secondary-text)' }}>7. Your Rights</h3>
                 <p>
                     You can:
                 </p>
@@ -435,12 +437,12 @@ export const PrivacyPolicy = () => {
                     <li>Contact us for privacy concerns at support@flashchat.com</li>
                 </ul>
                 <hr />
-                <h3 className="font-bold" style={{color:'var(--secondary-text)'}}>8. Changes to This Policy</h3>
+                <h3 className="font-bold" style={{ color: 'var(--secondary-text)' }}>8. Changes to This Policy</h3>
                 <p>
                     We may update this policy occasionally. You’ll be notified of major changes via in-app alerts or email.
                 </p>
                 <hr />
-                <h3 className="font-bold" style={{color:'var(--secondary-text)'}}>9. Contact</h3>
+                <h3 className="font-bold" style={{ color: 'var(--secondary-text)' }}>9. Contact</h3>
                 <p>
                     If you have questions, contact us at:<br />
                     <strong>Email:</strong> support@flashchat.com<br />
@@ -455,7 +457,7 @@ export const PrivacyPolicy = () => {
 
 export const Logout = () => {
     const URI = import.meta.env.VITE_API_URL;
-    const navigate = useNavigate(); 
+    const navigate = useNavigate();
     const logout = async (e) => {
         e.preventDefault();
         fetch(`${URI}logout`, {
@@ -472,6 +474,7 @@ export const Logout = () => {
     return (
         <form onSubmit={logout} className="p-4 flex justify-center">
             <button
+                id="logout-btn"
                 type='submit'
                 className="bg-red-500 p-3 rounded text-white w-full sm:w-1/5"
             >

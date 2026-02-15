@@ -36,7 +36,7 @@ const Navbar = () => {
                         Flash Chat
                     </h1>
                 )}
-                <button onClick={toggleSidebar} style={{ color: "var(--main-heading)" }}>
+                <button id="nav-toggle-btn" onClick={toggleSidebar} style={{ color: "var(--main-heading)" }}>
                     {isCollapsed ? (<FaBars />) : (<FaTimes />)}
                 </button>
             </div>
@@ -46,6 +46,7 @@ const Navbar = () => {
                 <ul className="space-y-4">
                     <li className="flex items-center p-2 cursor-pointer rounded-md">
                         <button
+                            id="settings-btn"
                             onClick={() => navigate("/settings")}
                             className="flex items-center rounded-md w-full"
                         >
@@ -60,6 +61,7 @@ const Navbar = () => {
                     </li>
                     <li className="flex items-center pl-1 cursor-pointer rounded-md">
                         <button
+                            id="theme-toggle-btn"
                             onClick={toggleDarkMode}
                             className="flex items-center rounded-md w-full"
                         >

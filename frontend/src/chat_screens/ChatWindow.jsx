@@ -403,12 +403,14 @@ const ChatWindow = ({ activeChat, activeUserId }) => {
                   className="w-32 h-32 rounded-lg border-2 border-gray-400 object-cover"
                 />
                 <button
+                  id='send-image-btn'
                   className="ml-2 p-2 w-10 h-10 bg-green-500 text-white rounded"
                   onClick={sendFile}
                 >
                   <FaPaperPlane />
                 </button>
                 <button
+                id="clear-img"
                   className="ml-auto p-2 w-10 h-10 bg-red-500 text-white rounded"
                   title="Clear"
                   onClick={() => {
@@ -426,12 +428,14 @@ const ChatWindow = ({ activeChat, activeUserId }) => {
               >
                 <p className="truncate">{file?.name}</p>
                 <button
+                  id="send-file-btn"
                   className="ml-2 p-2 w-10 h-10 bg-green-500 text-white rounded"
                   onClick={sendFile}
                 >
                   <FaPaperPlane />
                 </button>
                 <button
+                  id="clear-file-btn"
                   className="ml-auto p-2 w-10 h-10 bg-red-500 text-white rounded"
                   title="Clear"
                   onClick={() => {
@@ -449,6 +453,7 @@ const ChatWindow = ({ activeChat, activeUserId }) => {
         {/* Scroll to Bottom Button */}
         {showScrollButton && (
           <button
+            id="scroll-btn"
             className="fixed bottom-20 right-1/3 p-3 bg-blue-500 text-white rounded-full shadow-lg"
             onClick={scrollToBottom}
           >
@@ -491,6 +496,7 @@ const ChatWindow = ({ activeChat, activeUserId }) => {
           {/* Message Input */}
           <input
             type="text"
+            id='message-input'
             className="flex-1 border p-2 rounded min-w-0"
             placeholder="Enter a message..."
             value={inputMessage}
@@ -502,6 +508,7 @@ const ChatWindow = ({ activeChat, activeUserId }) => {
           />
           {/* Send Button */}
           <button
+            id="send-message-btn"
             className="ml-1 sm:ml-3 px-3 py-2 bg-blue-500 text-white rounded flex-shrink-0"
             onClick={sendMessage}
           >

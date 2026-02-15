@@ -203,9 +203,10 @@ const Register = () => {
                 {validationError.confirmPassword && <span className="text-red-500">{validationError.confirmPassword}</span>}
                 <br />
                 {error && <p className="text-red-500"> {error}</p>}<br />
-                <button type='submit' className="bg-yellow-500 p-3 rounded text-white" style={{ width: '20%' }} disabled={loading}>
+                <button type='submit' id="register-btn" className="bg-yellow-500 p-3 rounded text-white" style={{ width: '20%' }} disabled={loading}>
                     {loading ? <Spinner /> : "Register"}
                 </button>
+                <p>Already have an account? <a href="/login" className="text-[var(--btn-color)] mt-2">Login here</a></p>
             </form>
         </div>
     );

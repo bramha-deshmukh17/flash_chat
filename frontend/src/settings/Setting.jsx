@@ -35,6 +35,7 @@ const Setting = () => {
         <div id='settings' className="p-2 sm:p-4">
             <div className="flex items-center mb-2 sm:mb-4">
                 <button
+                id="chats-screen-btn"
                     className="mr-3 ml-5 px-3 py-1 rounded boldtext-sm sm:text-base"
                     onClick={() => navigate("/chats")}
                 >
@@ -49,6 +50,7 @@ const Setting = () => {
                         {Object.keys(sectionContent).map((item) => (
                             <li
                                 key={item}
+                                id={`${item.toLowerCase()}-section-btn`}
                                 className={`p-2 rounded-md cursor-pointer whitespace-nowrap`}
                                 onClick={() => setSelectedSection(item)}
                                 style={{

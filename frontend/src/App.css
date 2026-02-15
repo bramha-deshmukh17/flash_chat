@@ -81,7 +81,7 @@ button:focus {
     background-color: var(--bg-color);
 }
 
-#welcome div button {
+#welcome #register, #welcome #login  {
     color: var(--btn-text);
     padding: 1rem 2rem;
     font-size: 1.2rem;

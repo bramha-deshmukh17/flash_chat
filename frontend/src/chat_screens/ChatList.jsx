@@ -12,7 +12,7 @@ const ChatList = ({ setActiveChat, chatList, activeChat, setChatList }) => {
         e.preventDefault();
         setSearchText(e.target.value);
 
-        let search = document.getElementById('search_chat').value;
+        let search = document.getElementById('search-chat').value;
         fetch(`${URI}chats/search?query=${encodeURIComponent(search)}`, {
             method: 'GET',
             credentials: 'include',
@@ -59,14 +59,14 @@ const ChatList = ({ setActiveChat, chatList, activeChat, setChatList }) => {
         <div id="chat-list">
             <form onSubmit={handleSearch} className="relative max-w-lg w-full p-4">
                 <input
-                    id="search_chat"
+                    id="search-chat"
                     type="text"
                     placeholder="Search chats..."
                     className="w-full px-4 py-2 rounded-md pr-12"
                     value={searchText}
                     onChange={handleSearch}
                 />
-                <button type="submit" className="absolute right-6 top-1/2 transform -translate-y-1/2">
+                <button type="submit" id="search-btn" className="absolute right-6 top-1/2 transform -translate-y-1/2">
                     <FaSearch />
                 </button>
             </form>

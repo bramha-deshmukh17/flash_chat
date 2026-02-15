@@ -47,6 +47,7 @@ const FilePreview = ({ fileUrl, index, imageLoading, handleImageLoad, handleImag
                     {/* Download button overlaid at top-right */}
                     {imageLoading[index] === false ? (
                         <a
+                            id="dowanlod-file-btn"
                             href={fileUrl}
                             className="absolute top-2 right-2 text-blue-500 hover:underline text-sm bg-white bg-opacity-75 rounded"
                             download={filename}
@@ -56,7 +57,7 @@ const FilePreview = ({ fileUrl, index, imageLoading, handleImageLoad, handleImag
                         >
                             <FaDownload />
                         </a>
-                    ) :(
+                    ) : (
                         <p className="inset-0 flex p-5 items-center justify-center text-white text-sm rounded-lg">
                             Loading...
                         </p>
@@ -72,7 +73,7 @@ const FilePreview = ({ fileUrl, index, imageLoading, handleImageLoad, handleImag
             </div>
         );
     }
-     else {
+    else {
         const file = fileUrl.split("/").pop().split('?')[0];
         const parts = decodeURIComponent(file).split("/");
         const filename = parts[parts.length - 1];
