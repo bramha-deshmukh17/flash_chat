@@ -51,14 +51,10 @@ const ChatWindow = ({ activeChat, activeUserId }) => {
   // Refs to track scroll height when fetching older messages
   const prevScrollHeightRef = useRef(0);
   const isFetchingRef = useRef(false);
-  // New flag to indicate we are prepending older messages
   const isPrependingRef = useRef(false);
 
-  // Add this ref to track if user was at bottom before new messages
-  const wasAtBottomRef = useRef(true);
-
-  // Socket ref (single socket per component/tab)
-  const socketRef = useRef(null);
+  // state that actually re-renders UI for the loader
+  const [isFetchingOlder, setIsFetchingOlder] = useState(false);
 
   const handleImageLoad = (index) => {
     setImageLoading((prev) => ({ ...prev, [index]: false }));
@@ -145,9 +141,13 @@ const ChatWindow = ({ activeChat, activeUserId }) => {
       const newScrollHeight = scrollableDiv.scrollHeight;
       const diff = newScrollHeight - prevScrollHeightRef.current;
       scrollableDiv.scrollTop = diff;
+
       // Reset flags
       isFetchingRef.current = false;
       isPrependingRef.current = false;
+
+      // hide spinner after DOM + scroll restoration
+      setIsFetchingOlder(false);
     }
   }, [messages]);
 
@@ -160,6 +160,9 @@ const ChatWindow = ({ activeChat, activeUserId }) => {
       isPrependingRef.current = true;
     }
 
+    // show spinner (state-driven)
+    setIsFetchingOlder(true);
+
     fetch(`${URI}chats/${activeChat}/getmessages?section=${sectionToFetch}&limit=10`, {
       method: "GET",
       credentials: "include",
@@ -167,8 +170,6 @@ const ChatWindow = ({ activeChat, activeUserId }) => {
       .then((res) => res.json())
       .then(async (data) => {
         if (Array.isArray(data)) {
-
-          // Decrypt each message.message, but fall back to original on error
           const decryptedData = await Promise.all(
             data.map(async (msg) => {
               const chatPassword = `${activeChat}:${msg.by}`;
@@ -184,6 +185,7 @@ const ChatWindow = ({ activeChat, activeUserId }) => {
           );
 
           if (decryptedData.length > 0) {
+            // Keep spinner ON; it will be turned off in useLayoutEffect after scroll restore
             setMessages((prev) => [...decryptedData, ...prev]);
             setSection(sectionToFetch + 1);
             setHasMoreMessages(decryptedData.length === 10);
@@ -191,17 +193,22 @@ const ChatWindow = ({ activeChat, activeUserId }) => {
             setHasMoreMessages(false);
             isFetchingRef.current = false;
             isPrependingRef.current = false;
+            setIsFetchingOlder(false); 
           }
         } else {
+          // treat non-array as "no more" and ensure spinner turns off
           console.error("Unexpected response:", data);
+          setHasMoreMessages(false);
           isFetchingRef.current = false;
           isPrependingRef.current = false;
+          setIsFetchingOlder(false); 
         }
       })
       .catch((error) => {
         console.error("Chat Fetch Error:", error.message);
         isFetchingRef.current = false;
         isPrependingRef.current = false;
+        setIsFetchingOlder(false); 
       });
   };
 
@@ -212,7 +219,12 @@ const ChatWindow = ({ activeChat, activeUserId }) => {
     setMessages([]);
     setSection(1);
     setHasMoreMessages(true);
-    // Next tick fetch
+
+    // reset loader when switching chats
+    isFetchingRef.current = false;
+    isPrependingRef.current = false;
+    setIsFetchingOlder(false);
+
     setTimeout(() => {
       fetchMessages(1);
     }, 0);
@@ -361,9 +373,7 @@ const ChatWindow = ({ activeChat, activeUserId }) => {
 
         >
           {/* Spinner for fetching older messages */}
-          {isFetchingRef.current && isPrependingRef.current && (
-            <Spinner />
-          )}
+          {isFetchingOlder && <Spinner />}
           {messages.length > 0 ? (
             messages.map((msg, index) => (
               <div
@@ -410,7 +420,7 @@ const ChatWindow = ({ activeChat, activeUserId }) => {
                   <FaPaperPlane />
                 </button>
                 <button
-                id="clear-img"
+                  id="clear-img"
                   className="ml-auto p-2 w-10 h-10 bg-red-500 text-white rounded"
                   title="Clear"
                   onClick={() => {
