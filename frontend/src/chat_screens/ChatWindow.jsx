@@ -53,6 +53,10 @@ const ChatWindow = ({ activeChat, activeUserId }) => {
   const isFetchingRef = useRef(false);
   const isPrependingRef = useRef(false);
 
+  // Socket ref (single socket per component/tab)
+  const socketRef = useRef(null);
+  const wasAtBottomRef = useRef(true);
+
   // state that actually re-renders UI for the loader
   const [isFetchingOlder, setIsFetchingOlder] = useState(false);
 
